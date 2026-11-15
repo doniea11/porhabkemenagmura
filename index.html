@@ -234,8 +234,11 @@
                             <div>
                                 <h2 class="font-bold text-lg text-white">Daftar Kontingen & Pemain</h2>
                                 <p class="text-xs text-slate-400">Daftar seluruh pendaftar Futsal Putra dari seluruh kecamatan.</p>
+                                <div id="totalPendaftarBadge" class="mt-2 text-[11px] font-bold text-neonGreen bg-neonGreen/10 px-2.5 py-1.5 inline-flex items-center rounded-lg border border-neonGreen/20">
+                                    <i class="fa-solid fa-users mr-1.5"></i>Total Pendaftar Keseluruhan: 0 Orang
+                                </div>
                             </div>
-                            <div class="w-full md:w-auto">
+                            <div class="w-full md:w-auto mt-2 md:mt-0">
                                 <input type="text" id="searchPeserta" onkeyup="filterPesertaTable()" placeholder="Cari pemain/kecamatan/unsur..." class="bg-darkBg/80 border border-slate-700 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-neonGreen text-slate-200 w-full md:w-64">
                             </div>
                         </div>
@@ -688,7 +691,7 @@
         // SETTING API GOOGLE APPS SCRIPT (WEB APP URL)
         // SILAKAN GANTI URL DI BAWAH INI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA
         // =========================================================================
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzVgq4qr00QPioFfJLIPnb6Z7GqzlprErVoaiBKaYYQ-6drfRmzllEd9OcXihnSax8d-w/exec";
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxHMfG-J2SKNVpiA6htmGt-aB7fhEtP6gvzfmMJb4sV_OvZD80ep2I0AE4ZRxkX-YmfWg/exec";
         // =========================================================================
 
         let globalAppData = {
@@ -1133,6 +1136,13 @@
 
         function renderPesertaTable(dataList) {
             const tbody = document.getElementById('tablePesertaBody');
+            const badgeTotal = document.getElementById('totalPendaftarBadge');
+            
+            if (badgeTotal) {
+                var totalKeseluruhan = globalAppData.peserta ? globalAppData.peserta.length : 0;
+                badgeTotal.innerHTML = '<i class="fa-solid fa-users mr-1.5"></i>Total Pendaftar Keseluruhan: ' + totalKeseluruhan + ' Orang';
+            }
+
             if (!tbody) return;
 
             let sortedData = [...dataList].sort((a, b) => {
@@ -1736,3 +1746,10 @@
     </script>
 </body>
 </html>
+```
+
+***
+
+**🚀 ZettBOT Idea:**
+1. **Modular Check**: Arsitektur saat ini sangat tebal (lebih dari 1200 baris). Jika Anda ingin melakukan perombakan (memecah HTML menjadi `css.html` dan `js.html`), kita bisa melakukannya kapan saja untuk mempermudah Anda mencari blok kode tertentu di masa depan.
+2. **ZettBOT Feature**: Untuk mempermudah pemantauan panitia, apakah Anda tertarik untuk menambahkan efek suara sederhana (seperti bunyi peluit atau "ting") saat tombol "Kirim Pendaftaran" ditekan dan berhasil? Ini akan meningkatkan feedback bagi pengguna secara psikologis.

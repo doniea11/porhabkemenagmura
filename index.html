@@ -1395,11 +1395,33 @@
             let m14 = matches.find(m => m.ID_Match.includes('014')) || matches[13];
             let m15 = matches.find(m => m.ID_Match.includes('015')) || matches[14];
 
-            container.innerHTML = '<div class="min-w-[1100px] flex items-stretch justify-between py-6 px-2 gap-4">' +
+            // Update otomatis tim berdasarkan pemenang match sebelumnya
+            m9.Tim_A = m1.Pemenang && m1.Pemenang !== '-' ? m1.Pemenang : 'Pemenang 1';
+            m9.Tim_B = m2.Pemenang && m2.Pemenang !== '-' ? m2.Pemenang : 'Pemenang 2';
+            m10.Tim_A = m3.Pemenang && m3.Pemenang !== '-' ? m3.Pemenang : 'Pemenang 3';
+            m10.Tim_B = m4.Pemenang && m4.Pemenang !== '-' ? m4.Pemenang : 'Pemenang 4';
+
+            m11.Tim_A = m5.Pemenang && m5.Pemenang !== '-' ? m5.Pemenang : 'Pemenang 5';
+            m11.Tim_B = m6.Pemenang && m6.Pemenang !== '-' ? m6.Pemenang : 'Pemenang 6';
+            m12.Tim_A = m7.Pemenang && m7.Pemenang !== '-' ? m7.Pemenang : 'Pemenang 7';
+            m12.Tim_B = m8.Pemenang && m8.Pemenang !== '-' ? m8.Pemenang : 'Pemenang 8';
+
+            m13.Tim_A = m9.Pemenang && m9.Pemenang !== '-' ? m9.Pemenang : 'Pemenang 9';
+            m13.Tim_B = m10.Pemenang && m10.Pemenang !== '-' ? m10.Pemenang : 'Pemenang 10';
+            m14.Tim_A = m11.Pemenang && m11.Pemenang !== '-' ? m11.Pemenang : 'Pemenang 11';
+            m14.Tim_B = m12.Pemenang && m12.Pemenang !== '-' ? m12.Pemenang : 'Pemenang 12';
+
+            m15.Tim_A = m13.Pemenang && m13.Pemenang !== '-' ? m13.Pemenang : 'Pemenang 13';
+            m15.Tim_B = m14.Pemenang && m14.Pemenang !== '-' ? m14.Pemenang : 'Pemenang 14';
+
+            container.innerHTML = '<div class="min-w-[1150px] flex items-stretch justify-between py-6 px-2 gap-4">' +
                 '<div class="flex flex-col justify-around flex-1 space-y-2">' + renderMatchCard(m1, '1', isInteractive) + renderMatchCard(m2, '2', isInteractive) + renderMatchCard(m3, '3', isInteractive) + renderMatchCard(m4, '4', isInteractive) + '</div>' +
                 '<div class="flex flex-col justify-around flex-1 py-10 space-y-8">' + renderMatchCard(m9, '9', isInteractive) + renderMatchCard(m10, '10', isInteractive) + '</div>' +
                 '<div class="flex flex-col justify-center flex-1">' + renderMatchCard(m13, '13', isInteractive) + '</div>' +
-                '<div class="flex flex-col items-center justify-center flex-[1.2] px-2">' + renderMatchCard(m15, '15', isInteractive) + '</div>' +
+                '<div class="flex flex-col items-center justify-center flex-[1.2] px-2 relative">' + 
+                    '<div class="absolute -top-6 text-amber-400 text-xl animate-bounce" title="Grand Final"><i class="fa-solid fa-trophy"></i></div>' +
+                    renderMatchCard(m15, '15', isInteractive) + 
+                '</div>' +
                 '<div class="flex flex-col justify-center flex-1">' + renderMatchCard(m14, '14', isInteractive) + '</div>' +
                 '<div class="flex flex-col justify-around flex-1 py-10 space-y-8">' + renderMatchCard(m11, '11', isInteractive) + renderMatchCard(m12, '12', isInteractive) + '</div>' +
                 '<div class="flex flex-col justify-around flex-1 space-y-2">' + renderMatchCard(m5, '5', isInteractive) + renderMatchCard(m6, '6', isInteractive) + renderMatchCard(m7, '7', isInteractive) + renderMatchCard(m8, '8', isInteractive) + '</div>' +
@@ -1409,9 +1431,23 @@
         function renderMatchCard(m, seqNum, isInteractive) {
             if (!m) return '';
             let clickAttr = isInteractive ? `onclick="openPanitiaScoreModal('${m.ID_Match}')"` : '';
-            return `<div ${clickAttr} class="glass-panel p-3 rounded-xl border border-slate-700 text-xs shadow-md space-y-1 relative transition">
-                <div class="flex justify-between items-center text-white"><span class="truncate">${m.Tim_A}</span><span class="font-bold text-neonGreen">${m.Skor_A}</span></div>
-                <div class="flex justify-between items-center text-slate-300"><span class="truncate">${m.Tim_B}</span><span class="font-bold text-neonGreen">${m.Skor_B}</span></div>
+            
+            // Cek apakah pertandingan sedang berjalan (Match pertama yang belum selesai)
+            let isCurrentLive = (m.Status_Match === 'Sedang Berjalan' || m.Status_Match === 'Belum Mulai');
+            let matches = globalAppData.jadwalSkor || getDefaultJadwalSkor();
+            let firstActive = matches.find(item => item.Status_Match !== 'Selesai');
+            let isPulse = firstActive && firstActive.ID_Match === m.ID_Match;
+
+            let cardClass = isPulse ? "glass-panel p-3 rounded-xl border-2 border-neonGreen shadow-2xl space-y-1.5 relative transition cursor-pointer pulse-glow bg-slate-900/90" : "glass-panel p-3 rounded-xl border border-slate-700 text-xs shadow-md space-y-1.5 relative transition cursor-pointer hover:border-slate-500";
+
+            return `<div ${clickAttr} class="${cardClass}">
+                <div class="flex justify-between items-center text-[10px] text-slate-400 border-b border-slate-800 pb-1">
+                    <span class="font-bold text-cyan-400">Match ${seqNum} (${m.Babak})</span>
+                    <span class="${isPulse ? 'text-neonGreen font-bold animate-pulse' : 'text-slate-500'}">${m.Status_Match || 'Belum Mulai'}</span>
+                </div>
+                <div class="flex justify-between items-center text-white text-xs"><span class="truncate pr-2">${m.Tim_A}</span><span class="font-bold text-neonGreen font-mono px-1.5 py-0.5 rounded bg-slate-800">${m.Skor_A}</span></div>
+                <div class="flex justify-between items-center text-slate-300 text-xs"><span class="truncate pr-2">${m.Tim_B}</span><span class="font-bold text-neonGreen font-mono px-1.5 py-0.5 rounded bg-slate-800">${m.Skor_B}</span></div>
+                ${m.Pemenang && m.Pemenang !== '-' ? '<div class="text-[9px] text-amber-400 font-semibold pt-1 border-t border-slate-800/80 truncate">Pemenang: ' + m.Pemenang + '</div>' : ''}
             </div>`;
         }
 

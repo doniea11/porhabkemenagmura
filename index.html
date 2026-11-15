@@ -10,6 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;0,900;1,900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Pustaka jsPDF untuk Export PDF Skuad Kontingen -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -292,8 +294,11 @@
                                 <p class="text-[11px] text-neonGreen font-semibold">Susunan Kontingen Futsal Musi Rawas 2026</p>
                             </div>
                         </div>
-                        <div class="w-full sm:w-auto">
-                           <input type="text" id="searchSquad" onkeyup="filterSquadList()" placeholder="Cari kecamatan..." class="bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-neonGreen text-slate-200 w-full sm:w-56">
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                           <input type="text" id="searchSquad" onkeyup="filterSquadList()" placeholder="Cari kecamatan..." class="bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-neonGreen text-slate-200 w-full sm:w-48">
+                           <button onclick="exportSquadPDF()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition flex items-center gap-1.5 shadow-md flex-shrink-0 touch-manipulation" title="Export PDF Skuad">
+                               <i class="fa-solid fa-file-pdf"></i><span>PDF</span>
+                           </button>
                         </div>
                     </div>
                     <div id="squadListContent" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -340,7 +345,6 @@
                         </select>
                     </div>
 
-                    <!-- Perbaikan: Tambahkan ID dan kelas pendukung agar elemen kartu tampil sempurna saat dicetak -->
                     <div id="idCardPreviewBox" class="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950 border-2 border-neonGreen/40 rounded-2xl p-4 sm:p-6 shadow-2xl relative overflow-hidden hidden max-w-sm mx-auto w-full">
                         <div class="absolute top-0 right-0 w-24 h-24 bg-neonGreen/10 rounded-full blur-xl"></div>
                         <div class="flex items-center justify-between border-b border-slate-700/80 pb-3 mb-3">
@@ -444,6 +448,9 @@
                         <div class="flex flex-wrap items-center gap-3">
                             <button onclick="exportDataExcel()" class="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 touch-manipulation">
                                 <i class="fa-solid fa-file-excel"></i><span>Export Excel</span>
+                            </button>
+                            <button onclick="exportSquadPDF()" class="flex-1 sm:flex-none px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-rose-600/20 touch-manipulation">
+                                <i class="fa-solid fa-file-pdf"></i><span>Export PDF Skuad</span>
                             </button>
                             <button onclick="cetakLaporanPeserta()" class="flex-1 sm:flex-none px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg touch-manipulation">
                                 <i class="fa-solid fa-users"></i><span>Cetak Peserta</span>
@@ -687,7 +694,7 @@
     </div>
 
     <script>
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzN5ovin9byG1sYCsj0YD_FwJFwxiV6MRTKD8_FcpcN881kE-vPC7vQckZjf11Ax97R9g/exec";
+        const GAS_API_URL = (typeof google !== 'undefined' && google.script && google.script.run) ? window.location.href : "https://script.google.com/macros/s/AKfycbx8K78dH96YrBGAPswJON-uT_JuHMSHHe--oMZY2EPAmWhX4qosDNdrkE4-2tyFqddDMQ/exec";
 
         let globalAppData = {
             pengaturan: {},
@@ -707,16 +714,36 @@
         ];
 
         async function fetchAPI(action, dataPayload = null) {
-            if (GAS_API_URL === "MASUKKAN_URL_APPS_SCRIPT_ANDA_DISINI") {
-                throw new Error("Tolong ganti variabel GAS_API_URL dengan URL Apps Script Web App Anda terlebih dahulu.");
+            if (typeof google !== 'undefined' && google.script && google.script.run) {
+                return new Promise((resolve, reject) => {
+                    google.script.run
+                        .withSuccessHandler(res => resolve(res))
+                        .withFailureHandler(err => reject(err))
+                        .doPostForCanvas({ postData: { contents: JSON.stringify({ action, data: dataPayload }) } });
+                });
             }
+
+            if (GAS_API_URL === "MASUKKAN_URL_APPS_SCRIPT_ANDA_DISINI") {
+                // Mock data untuk Canvas preview tanpa backend Apps Script aktif
+                if (action === 'getAppData') {
+                    return {
+                        status: 'success',
+                        pengaturan: { Pengumuman_Berjalan: 'Selamat Datang di Pendaftaran Futsal HAB Kemenag Musi Rawas 2026' },
+                        peserta: [
+                            { ID_Pendaftaran: 'REG-20260101-1', Nama_Pemain: 'SUPRAPTO', Nomor_HP: '081234567890', Unsur: 'Madrasah', Nama_Lembaga: 'Madrasah', Nama_Kecamatan: 'Kec. Tugumulyo', Status_Pemain: 'Prioritas 1 dari Madrasah', Timestamp: '01/01/2026 10:00:00' }
+                        ],
+                        jadwalSkor: getDefaultJadwalSkor()
+                    };
+                }
+                return { status: 'success' };
+            }
+
             try {
                 const response = await fetch(GAS_API_URL, {
                     method: 'POST',
                     body: JSON.stringify({ action: action, data: dataPayload }),
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
                 });
-                
                 if (!response.ok) throw new Error("Terjadi kesalahan jaringan.");
                 const result = await response.json();
                 return result;
@@ -1187,7 +1214,7 @@
         function renderSquadList(filterQuery = '') {
             const container = document.getElementById('squadListContent');
             if (!container) return;
-            const allTeams = [...daftarKecamatanMusiRawas, "Kemenag Internal", "Kemenhaj Musi Rawas"];
+            const allTeams = ["Kemenag Internal", "Kemenhaj Musi Rawas", ...daftarKecamatanMusiRawas];
             
             let html = '';
             allTeams.forEach(kec => {
@@ -1198,26 +1225,87 @@
                 
                 let liHtml = '';
                 if(players.length === 0) {
-                     liHtml = '<p class="text-[10px] text-slate-500 italic py-2">Tidak ada data.</p>';
+                     liHtml = '<p class="text-[11px] text-slate-500 italic py-3 text-center">Belum ada skuad terdaftar.</p>';
                 } else {
                      players.forEach(p => {
-                         liHtml += `<div class="flex flex-col py-1.5 border-b border-slate-700/50 last:border-0">
-                             <div class="flex justify-between items-start">
-                                 <span class="font-bold text-xs text-white">${p.Nama_Pemain}</span>
-                                 <span class="text-[9px] font-bold text-neonGreen">${p.Status_Pemain}</span>
+                         liHtml += `<div class="flex flex-col py-2 border-b border-slate-800/80 last:border-0">
+                             <div class="flex justify-between items-start gap-2">
+                                 <span class="font-bold text-xs text-white uppercase tracking-tight">${p.Nama_Pemain}</span>
+                                 <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-neonGreen/10 text-neonGreen border border-neonGreen/20 whitespace-nowrap">${p.Status_Pemain}</span>
                              </div>
-                             <span class="text-[10px] text-slate-400">${p.Unsur || '-'}</span>
+                             <div class="flex justify-between items-center mt-0.5">
+                                 <span class="text-[10px] text-slate-400 font-medium">${p.Unsur || '-'}${p.Nama_Lembaga ? ' (' + p.Nama_Lembaga + ')' : ''}</span>
+                                 <span class="text-[9px] font-mono text-cyan-400">${p.ID_Pendaftaran}</span>
+                             </div>
                          </div>`;
                      });
                 }
-                html += `<div class="glass-panel p-4 rounded-xl border border-slate-700 shadow-md">
-                    <h3 class="font-bold text-sm text-amber-400 border-b border-slate-700 pb-2 mb-2"><i class="fa-solid fa-location-dot mr-2"></i>${kec}</h3>
-                    <div class="space-y-1">${liHtml}</div>
+                html += `<div class="glass-panel p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-xl flex flex-col justify-between hover:border-slate-700 transition duration-200">
+                    <div>
+                        <h3 class="font-bold text-sm text-amber-400 border-b border-slate-800 pb-2.5 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-location-dot text-amber-400"></i><span class="truncate">${kec}</span>
+                        </h3>
+                        <div class="space-y-1">${liHtml}</div>
+                    </div>
                 </div>`;
             });
             container.innerHTML = html;
         }
         function filterSquadList() { renderSquadList(document.getElementById('searchSquad').value.toLowerCase()); }
+
+        // Fitur Export PDF Skuad Kontingen menggunakan jsPDF
+        function exportSquadPDF() {
+            if (typeof window.jspdf === 'undefined') {
+                return showErrorModal("Peringatan", "Pustaka jsPDF belum termuat dengan sempurna.");
+            }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(14);
+            doc.text("KANTOR KEMENTERIAN AGAMA KABUPATEN MUSI RAWAS", 105, 15, { align: "center" });
+            doc.setFontSize(12);
+            doc.text("DAFTAR SKUAD KONTINGEN FUTSAL HAB 2026", 105, 22, { align: "center" });
+
+            doc.setLineWidth(0.5);
+            doc.line(14, 26, 196, 26);
+
+            let yPos = 35;
+            const allTeams = ["Kemenag Internal", "Kemenhaj Musi Rawas", ...daftarKecamatanMusiRawas];
+
+            allTeams.forEach(kec => {
+                let players = (globalAppData.peserta || []).filter(p => p.Nama_Kecamatan === kec);
+                if (players.length > 0) {
+                    if (yPos > 270) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(11);
+                    doc.setTextColor(0, 150, 100);
+                    doc.text(kec, 14, yPos);
+                    yPos += 6;
+
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(9);
+                    doc.setTextColor(40, 40, 40);
+
+                    players.forEach((p, idx) => {
+                        if (yPos > 280) {
+                            doc.addPage();
+                            yPos = 20;
+                        }
+                        let textLine = `${idx + 1}. ${p.Nama_Pemain} | ${p.Unsur} ${p.Nama_Lembaga ? '('+p.Nama_Lembaga+')' : ''} | Status: ${p.Status_Pemain} (${p.ID_Pendaftaran})`;
+                        doc.text(textLine, 18, yPos);
+                        yPos += 5;
+                    });
+                    yPos += 4;
+                }
+            });
+
+            doc.save("Daftar_Skuad_Futsal_HAB_2026.pdf");
+            showErrorModal("Berhasil", "File PDF Skuad Kontingen berhasil diunduh!", true);
+        }
 
         function populateCetakKartuDropdown() {
             const select = document.getElementById('selectPesertaCetak');
@@ -1254,7 +1342,6 @@
             previewBox.classList.remove('hidden');
         }
 
-        // Perbaikan: Fungsi printIdCard agar elemen kartu aktif saat dicetak tanpa kosong
         function printIdCard() {
             const cardBox = document.getElementById('idCardPreviewBox');
             if(cardBox.classList.contains('hidden')) {

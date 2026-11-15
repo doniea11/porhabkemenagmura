@@ -211,9 +211,9 @@
 
                             <div>
                                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Nomor WhatsApp / HP</label>
-                                <input type="text" id="regHp" oninput="formatHpInput(this)" class="w-full bg-darkBg/80 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-neonGreen transition text-slate-200 font-mono" required value="08">
+                                <input type="text" id="regHp" minlength="10" maxlength="13" oninput="formatHpInput(this)" class="w-full bg-darkBg/80 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-neonGreen transition text-slate-200 font-mono" required value="08">
                                 <div id="hpIndicatorBox" class="mt-1.5 flex items-center justify-between text-[11px]">
-                                    <span id="hpStatusText" class="text-slate-400">Harus diawali 08 (8-13 digit)</span>
+                                    <span id="hpStatusText" class="text-slate-400">Harus diawali 08 (10-13 digit)</span>
                                     <span id="hpDigitCount" class="font-mono text-slate-500">2 digit</span>
                                 </div>
                             </div>
@@ -259,8 +259,15 @@
                         </div>
                         
                         <!-- PAGINASI TABLE -->
-                        <div class="flex items-center justify-between border-t border-slate-800/80 pt-4 mt-4">
-                            <span class="text-[10px] text-slate-400 font-medium" id="paginationInfo">Menampilkan 0 data</span>
+                        <div class="flex items-center justify-between border-t border-slate-800/80 pt-4 mt-4 flex-wrap gap-4">
+                            <div class="flex items-center space-x-3">
+                                <select id="rowsPerPageSelect" onchange="changeRowsPerPage()" class="bg-darkBg/80 border border-slate-700 rounded-lg px-2 py-1 text-[10px] text-slate-300 focus:outline-none focus:border-neonGreen transition cursor-pointer">
+                                    <option value="10">Tampilkan 10</option>
+                                    <option value="20">Tampilkan 20</option>
+                                    <option value="50">Tampilkan 50</option>
+                                </select>
+                                <span class="text-[10px] text-slate-400 font-medium" id="paginationInfo">Menampilkan 0 data</span>
+                            </div>
                             <div class="flex items-center space-x-2" id="paginationControls">
                                 <button onclick="prevPagePeserta()" id="btnPrevPage" class="px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition text-xs shadow-sm"><i class="fa-solid fa-chevron-left"></i></button>
                                 <span id="pageNumberDisplay" class="text-[11px] font-bold text-slate-300 px-2">Hal 1 / 1</span>
@@ -681,7 +688,7 @@
         // SETTING API GOOGLE APPS SCRIPT (WEB APP URL)
         // SILAKAN GANTI URL DI BAWAH INI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA
         // =========================================================================
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwBN6piPrOm9JIIFUrLD73HbmyMEXZYl5fv-NQs9-yojsv43TiR6RiV29XnbRmKCTl5RQ/exec";
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzVgq4qr00QPioFfJLIPnb6Z7GqzlprErVoaiBKaYYQ-6drfRmzllEd9OcXihnSax8d-w/exec";
         // =========================================================================
 
         let globalAppData = {
@@ -692,7 +699,7 @@
 
         // --- STATE PAGINASI ---
         let currentPagePeserta = 1;
-        const rowsPerPagePeserta = 10;
+        let rowsPerPagePeserta = 10;
         let filteredPesertaCache = [];
         // ------------------------
 
@@ -910,8 +917,8 @@
             const len = val.length;
             const statusText = document.getElementById('hpStatusText');
             document.getElementById('hpDigitCount').innerText = len + " digit";
-            if (len < 8) {
-                statusText.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1 text-amber-400"></i>Min. 8 digit';
+            if (len < 10) {
+                statusText.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1 text-amber-400"></i>Min. 10 digit';
                 statusText.className = "text-amber-400";
             } else {
                 statusText.innerHTML = '<i class="fa-solid fa-circle-check mr-1 text-neonGreen"></i>Valid';
@@ -1048,12 +1055,16 @@
 
             let totalKec = 0;
             let currentUnsurInti = 0;
+            let totalPrioritasKec = 0;
 
             if (globalAppData.peserta) {
                 globalAppData.peserta.forEach(p => {
                     if (p.Nama_Kecamatan === kecamatan) {
                         totalKec++;
-                        if (p.Unsur === unsur && p.Status_Pemain && (p.Status_Pemain === 'Inti' || p.Status_Pemain.includes('Prioritas'))) currentUnsurInti++;
+                        if (p.Status_Pemain && (p.Status_Pemain === 'Inti' || p.Status_Pemain.includes('Prioritas'))) {
+                            totalPrioritasKec++;
+                            if (p.Unsur === unsur) currentUnsurInti++;
+                        }
                     }
                 });
             }
@@ -1062,6 +1073,7 @@
             let htmlInfo = `Total Pendaftar Kecamatan (${kecamatan}): <span class="text-white font-bold">${totalKec}/8 orang (Maksimal)</span><br>`;
             
             if(totalKec >= 8) {
+                htmlInfo += `Status Awal Anda: <span class="text-rose-500 font-bold">Tidak Tersedia</span>`;
                 htmlInfo += `<span class="text-rose-400 font-bold mt-1 block">Batas maksimal pendaftar (8 orang) telah tercapai untuk kecamatan ini.</span>`;
                 btnSubmit.disabled = true;
                 btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
@@ -1072,9 +1084,12 @@
                 btnSubmit.classList.add('hover:bg-neonHover');
 
                 if(khusus.includes(unsur)) {
-                    htmlInfo += `Status Slot Inti Unsur Anda (${unsur}): ` + (currentUnsurInti >= 2 ? `<span class="text-amber-400 font-bold">Penuh (${currentUnsurInti}/2) - Pendaftar baru masuk ke cadangan.</span>` : `<span class="text-neonGreen font-bold">Tersedia (${currentUnsurInti}/2)</span>`);
+                    htmlInfo += `Status Slot Inti Unsur Anda (${unsur}): ` + (currentUnsurInti >= 2 ? `<span class="text-amber-400 font-bold">Penuh (${currentUnsurInti}/2) - Pendaftar baru masuk ke Cadangan.</span>` : `<span class="text-neonGreen font-bold">Tersedia (${currentUnsurInti}/2)</span>`);
+                } else if (unsur === "Kemenag Internal" || unsur === "Kemenhaj Musi Rawas") {
+                    let nextPriority = totalPrioritasKec + 1;
+                    htmlInfo += `Status Awal Anda: <span class="text-neonGreen font-bold">Prioritas ${nextPriority}</span>`;
                 } else {
-                    htmlInfo += `Status Awal Anda: <span class="text-amber-400 font-bold">Cadangan</span>`;
+                    htmlInfo += `Status Awal Anda: <span class="text-neonGreen font-bold">Tersedia</span>`;
                 }
             }
             
@@ -1093,7 +1108,7 @@
             const namaPemain = document.getElementById('regNama').value.toUpperCase();
             let rawHp = document.getElementById('regHp').value;
             
-            if (rawHp.length < 8) return showErrorModal('Peringatan Validasi', 'Nomor HP tidak valid.');
+            if (rawHp.length < 10 || rawHp.length > 13) return showErrorModal('Peringatan Validasi', 'Nomor HP tidak valid. Minimal 10 digit dan maksimal 13 digit.');
 
             showLoading("Menyimpan...");
             try {
@@ -1203,6 +1218,13 @@
             }
         }
 
+        function changeRowsPerPage() {
+            const select = document.getElementById('rowsPerPageSelect');
+            rowsPerPagePeserta = parseInt(select.value, 10);
+            currentPagePeserta = 1;
+            renderPesertaTable(filteredPesertaCache);
+        }
+
         function filterPesertaTable() {
             const query = document.getElementById('searchPeserta').value.toLowerCase();
             const filtered = (globalAppData.peserta || []).filter(p => {
@@ -1250,6 +1272,13 @@
                 } else {
                      players.forEach(p => {
                          let hp = p.Nomor_HP ? p.Nomor_HP.toString().replace(/^'/, '') : '-';
+                         let waHtmlSquad = `<span class="text-[10px] text-slate-500 font-mono"><i class="fa-brands fa-whatsapp mr-1"></i>${hp}</span>`;
+                         
+                         if (hp !== '-' && hp.length >= 8) {
+                             let waNum = hp.startsWith('0') ? '62' + hp.substring(1) : hp;
+                             waHtmlSquad = `<a href="https://wa.me/${waNum}" target="_blank" class="text-[10px] text-cyan-400 font-mono hover:text-neonGreen hover:underline transition"><i class="fa-brands fa-whatsapp mr-1"></i>${hp}</a>`;
+                         }
+                         
                          liHtml += `<div class="flex flex-col py-2 border-b border-slate-700/50 last:border-0">
                              <div class="flex justify-between items-start">
                                  <span class="font-bold text-xs text-white">${p.Nama_Pemain}</span>
@@ -1257,7 +1286,7 @@
                              </div>
                              <div class="flex justify-between items-center mt-1">
                                  <span class="text-[10px] text-slate-400">${p.Unsur || '-'}</span>
-                                 <span class="text-[10px] text-cyan-400 font-mono"><i class="fa-brands fa-whatsapp mr-1"></i>${hp}</span>
+                                 ${waHtmlSquad}
                              </div>
                          </div>`;
                      });

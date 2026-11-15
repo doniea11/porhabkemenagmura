@@ -947,7 +947,7 @@
         }
 
         async function loadAllData() {
-            showLoading("Memuat Data...");
+            showLoading("Design by Masdonie");
             try {
                 const res = await fetchAPI('getAppData');
                 hideLoading();
@@ -980,7 +980,8 @@
                 { ID_Match: 'MATCH-012', Babak: 'Perempat Final', Tim_A: 'Pemenang 7', Tim_B: 'Pemenang 8', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
                 { ID_Match: 'MATCH-013', Babak: 'Semifinal', Tim_A: 'Pemenang 9', Tim_B: 'Pemenang 10', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
                 { ID_Match: 'MATCH-014', Babak: 'Semifinal', Tim_A: 'Pemenang 11', Tim_B: 'Pemenang 12', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
-                { ID_Match: 'MATCH-015', Babak: 'Grand Final', Tim_A: 'Pemenang 13', Tim_B: 'Pemenang 14', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' }
+                { ID_Match: 'MATCH-015', Babak: 'Grand Final', Tim_A: 'Pemenang 13', Tim_B: 'Pemenang 14', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
+                { ID_Match: 'MATCH-016', Babak: 'Juara 3 & 4', Tim_A: 'Kalah Semifinal 1', Tim_B: 'Kalah Semifinal 2', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' }
             ];
         }
 
@@ -1101,7 +1102,7 @@
             
             if (rawHp.length < 10 || rawHp.length > 13) return showErrorModal('Peringatan Validasi', 'Nomor HP tidak valid.');
 
-            showLoading("Menyimpan...");
+            showLoading("Design by Masdonie");
             try {
                 const payload = { kecamatan, unsur, namaLembaga, namaPemain, nomorHp: rawHp };
                 const res = await fetchAPI('daftarPeserta', payload);
@@ -1394,6 +1395,7 @@
             let m13 = matches.find(m => m.ID_Match.includes('013')) || matches[12];
             let m14 = matches.find(m => m.ID_Match.includes('014')) || matches[13];
             let m15 = matches.find(m => m.ID_Match.includes('015')) || matches[14];
+            let m16 = matches.find(m => m.ID_Match.includes('016')) || matches[15];
 
             // Update otomatis tim berdasarkan pemenang match sebelumnya
             m9.Tim_A = m1.Pemenang && m1.Pemenang !== '-' ? m1.Pemenang : 'Pemenang 1';
@@ -1414,13 +1416,26 @@
             m15.Tim_A = m13.Pemenang && m13.Pemenang !== '-' ? m13.Pemenang : 'Pemenang 13';
             m15.Tim_B = m14.Pemenang && m14.Pemenang !== '-' ? m14.Pemenang : 'Pemenang 14';
 
+            // Otomatis tentukan tim yang kalah di Semifinal (Match 13 & 14) untuk Rebut Juara 3
+            if (m13.Pemenang && m13.Pemenang !== '-' && m13.Pemenang !== 'Imbang / Adu Penalti') {
+                m16.Tim_A = (m13.Pemenang === m13.Tim_A) ? m13.Tim_B : m13.Tim_A;
+            } else {
+                m16.Tim_A = 'Kalah Semifinal 1';
+            }
+            if (m14.Pemenang && m14.Pemenang !== '-' && m14.Pemenang !== 'Imbang / Adu Penalti') {
+                m16.Tim_B = (m14.Pemenang === m14.Tim_A) ? m14.Tim_B : m14.Tim_A;
+            } else {
+                m16.Tim_B = 'Kalah Semifinal 2';
+            }
+
             container.innerHTML = '<div class="min-w-[1150px] flex items-stretch justify-between py-6 px-2 gap-4">' +
                 '<div class="flex flex-col justify-around flex-1 space-y-2">' + renderMatchCard(m1, '1', isInteractive) + renderMatchCard(m2, '2', isInteractive) + renderMatchCard(m3, '3', isInteractive) + renderMatchCard(m4, '4', isInteractive) + '</div>' +
                 '<div class="flex flex-col justify-around flex-1 py-10 space-y-8">' + renderMatchCard(m9, '9', isInteractive) + renderMatchCard(m10, '10', isInteractive) + '</div>' +
                 '<div class="flex flex-col justify-center flex-1">' + renderMatchCard(m13, '13', isInteractive) + '</div>' +
-                '<div class="flex flex-col items-center justify-center flex-[1.2] px-2 relative">' + 
+                '<div class="flex flex-col items-center justify-center flex-[1.3] px-2 relative space-y-4">' + 
                     '<div class="absolute -top-6 text-amber-400 text-xl animate-bounce" title="Grand Final"><i class="fa-solid fa-trophy"></i></div>' +
-                    renderMatchCard(m15, '15', isInteractive) + 
+                    '<div class="w-full">' + renderMatchCard(m15, '15', isInteractive, true) + '</div>' +
+                    '<div class="w-full">' + renderMatchCard(m16, '16', isInteractive, false, true) + '</div>' +
                 '</div>' +
                 '<div class="flex flex-col justify-center flex-1">' + renderMatchCard(m14, '14', isInteractive) + '</div>' +
                 '<div class="flex flex-col justify-around flex-1 py-10 space-y-8">' + renderMatchCard(m11, '11', isInteractive) + renderMatchCard(m12, '12', isInteractive) + '</div>' +
@@ -1428,26 +1443,35 @@
             '</div>';
         }
 
-        function renderMatchCard(m, seqNum, isInteractive) {
+        function renderMatchCard(m, seqNum, isInteractive, isGrandFinal = false, isThirdPlace = false) {
             if (!m) return '';
             let clickAttr = isInteractive ? `onclick="openPanitiaScoreModal('${m.ID_Match}')"` : '';
             
-            // Cek apakah pertandingan sedang berjalan (Match pertama yang belum selesai)
-            let isCurrentLive = (m.Status_Match === 'Sedang Berjalan' || m.Status_Match === 'Belum Mulai');
             let matches = globalAppData.jadwalSkor || getDefaultJadwalSkor();
             let firstActive = matches.find(item => item.Status_Match !== 'Selesai');
             let isPulse = firstActive && firstActive.ID_Match === m.ID_Match;
 
-            let cardClass = isPulse ? "glass-panel p-3 rounded-xl border-2 border-neonGreen shadow-2xl space-y-1.5 relative transition cursor-pointer pulse-glow bg-slate-900/90" : "glass-panel p-3 rounded-xl border border-slate-700 text-xs shadow-md space-y-1.5 relative transition cursor-pointer hover:border-slate-500";
+            let cardClass = "glass-panel p-3 rounded-xl border text-xs shadow-md space-y-1.5 relative transition cursor-pointer ";
+            if (isGrandFinal) {
+                cardClass += "border-2 border-amber-500 bg-amber-950/20 shadow-amber-500/20 shadow-xl p-4 scale-105";
+            } else if (isThirdPlace) {
+                cardClass += "border-2 border-purple-500 bg-purple-950/20 shadow-purple-500/20 shadow-xl p-4 scale-105";
+            } else if (isPulse) {
+                cardClass += "border-2 border-neonGreen shadow-2xl pulse-glow bg-slate-900/90";
+            } else {
+                cardClass += "border-slate-700 hover:border-slate-500";
+            }
+
+            let badgeTitle = isGrandFinal ? '<span class="text-amber-400 font-bold"><i class="fa-solid fa-trophy mr-1"></i>Grand Final</span>' : (isThirdPlace ? '<span class="text-purple-400 font-bold"><i class="fa-solid fa-medal mr-1"></i>Perebutan Juara 3</span>' : `<span class="font-bold text-cyan-400">Match ${seqNum} (${m.Babak})</span>`);
 
             return `<div ${clickAttr} class="${cardClass}">
                 <div class="flex justify-between items-center text-[10px] text-slate-400 border-b border-slate-800 pb-1">
-                    <span class="font-bold text-cyan-400">Match ${seqNum} (${m.Babak})</span>
+                    ${badgeTitle}
                     <span class="${isPulse ? 'text-neonGreen font-bold animate-pulse' : 'text-slate-500'}">${m.Status_Match || 'Belum Mulai'}</span>
                 </div>
                 <div class="flex justify-between items-center text-white text-xs"><span class="truncate pr-2">${m.Tim_A}</span><span class="font-bold text-neonGreen font-mono px-1.5 py-0.5 rounded bg-slate-800">${m.Skor_A}</span></div>
                 <div class="flex justify-between items-center text-slate-300 text-xs"><span class="truncate pr-2">${m.Tim_B}</span><span class="font-bold text-neonGreen font-mono px-1.5 py-0.5 rounded bg-slate-800">${m.Skor_B}</span></div>
-                ${m.Pemenang && m.Pemenang !== '-' ? '<div class="text-[9px] text-amber-400 font-semibold pt-1 border-t border-slate-800/80 truncate">Pemenang: ' + m.Pemenang + '</div>' : ''}
+                ${m.Pemenang && m.Pemenang !== '-' ? '<div class="text-[9px] ' + (isGrandFinal ? 'text-amber-400' : (isThirdPlace ? 'text-purple-300' : 'text-amber-400')) + ' font-semibold pt-1 border-t border-slate-800/80 truncate">Pemenang: ' + m.Pemenang + '</div>' : ''}
             </div>`;
         }
 
@@ -1470,7 +1494,7 @@
             const skorA = document.getElementById('inputSkorA').value;
             const skorB = document.getElementById('inputSkorB').value;
             closeScoreModal();
-            showLoading("Menyimpan Skor...");
+            showLoading("Design by Masdonie");
             try {
                 const res = await fetchAPI('updateSkorMatch', { idMatch, skorA, skorB, status: 'Selesai' });
                 hideLoading();
@@ -1480,7 +1504,7 @@
 
         async function updateAnnouncementAdmin() {
             const val = document.getElementById('adminAnnouncement').value;
-            showLoading("Menyimpan...");
+            showLoading("Design by Masdonie");
             try {
                 await fetchAPI('updatePengaturan', { kunci: 'Pengumuman_Berjalan', nilai: val });
                 hideLoading();
@@ -1491,7 +1515,7 @@
         async function updatePinPanitiaAdmin() {
             const newPin = document.getElementById('adminNewPin').value;
             if(!newPin) return showErrorModal("Peringatan", "PIN baru kosong.");
-            showLoading("Memperbarui...");
+            showLoading("Design by Masdonie");
             try {
                 await fetchAPI('updatePengaturan', { kunci: 'PIN_Panel_Panitia', nilai: newPin });
                 hideLoading();
@@ -1502,7 +1526,7 @@
         async function updatePinAdminAdmin() {
             const newPin = document.getElementById('adminNewPinAdmin').value;
             if(!newPin) return showErrorModal("Peringatan", "PIN baru kosong.");
-            showLoading("Memperbarui...");
+            showLoading("Design by Masdonie");
             try {
                 await fetchAPI('updatePengaturan', { kunci: 'PIN_Panel_Admin', nilai: newPin });
                 hideLoading();
@@ -1511,7 +1535,7 @@
         }
         
         async function prosesKuotaIntiSistem() {
-            showLoading("Kalkulasi...");
+            showLoading("Design by Masdonie");
             try {
                 const res = await fetchAPI('prosesPenentuanInti');
                 hideLoading();
@@ -1520,7 +1544,7 @@
         }
 
         async function undiBaganSistem() {
-            showLoading("Mengundi...");
+            showLoading("Design by Masdonie");
             try {
                 const res = await fetchAPI('undiBagan');
                 hideLoading();
@@ -1531,7 +1555,7 @@
         async function simpanJadwalPanitia() {
             const buka = document.getElementById('panitiaTglBuka').value;
             const tutup = document.getElementById('panitiaTglTutup').value;
-            showLoading("Menyimpan...");
+            showLoading("Design by Masdonie");
             try {
                 await fetchAPI('updatePengaturanBatch', [{ kunci: "Tanggal_Buka_Pendaftaran", nilai: buka }, { kunci: "Tanggal_Batas_Pendaftaran", nilai: tutup }]);
                 hideLoading();

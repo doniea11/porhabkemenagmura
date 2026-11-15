@@ -372,6 +372,8 @@
                             <div>
                                 <p class="text-[10px] text-slate-400">ID Pendaftaran:</p>
                                 <p id="cardIdReg" class="font-mono text-xs text-white font-bold">REG-0001</p>
+                                <p class="text-[10px] text-slate-400 mt-1">Waktu Terdaftar:</p>
+                                <p id="cardTimestamp" class="font-mono text-[11px] text-cyan-400 font-bold">-</p>
                             </div>
                             <div class="bg-white p-2 rounded-xl shadow" id="qrcodeContainer">
                             </div>
@@ -691,7 +693,7 @@
         // SETTING API GOOGLE APPS SCRIPT (WEB APP URL)
         // SILAKAN GANTI URL DI BAWAH INI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA
         // =========================================================================
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxHMfG-J2SKNVpiA6htmGt-aB7fhEtP6gvzfmMJb4sV_OvZD80ep2I0AE4ZRxkX-YmfWg/exec";
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw23j4k6ZRTu_QEmE6U8d1E7tXve3fR6JGSFcfrpp_a2nnVoSrXXirwMGJbTuRIve6Xnw/exec";
         // =========================================================================
 
         let globalAppData = {
@@ -715,7 +717,7 @@
 
         // --- SISTEM PEMANGGILAN API VIA FETCH (GANTI GOOGLE.SCRIPT.RUN) ---
         async function fetchAPI(action, dataPayload = null) {
-            if (GAS_API_URL === "https://script.google.com/macros/s/AKfycbx1fCRhLcbnwdOotEiI6z8g9BseESeNxS31VZZpnf7OxWndEqpie24xUhuvT2QcGLfPKw/exec") {
+            if (GAS_API_URL === "MASUKKAN_URL_APPS_SCRIPT_ANDA_DISINI") {
                 throw new Error("Tolong ganti variabel GAS_API_URL dengan URL Apps Script Web App Anda terlebih dahulu.");
             }
             try {
@@ -1086,13 +1088,14 @@
                 btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
                 btnSubmit.classList.add('hover:bg-neonHover');
 
+                let nextPriority = totalKec + 1;
+
                 if(khusus.includes(unsur)) {
-                    htmlInfo += `Status Slot Inti Unsur Anda (${unsur}): ` + (currentUnsurInti >= 2 ? `<span class="text-amber-400 font-bold">Penuh (${currentUnsurInti}/2) - Pendaftar baru masuk ke Cadangan.</span>` : `<span class="text-neonGreen font-bold">Tersedia (${currentUnsurInti}/2)</span>`);
+                    htmlInfo += `Status Slot Inti Unsur Anda (${unsur}): ` + (currentUnsurInti >= 2 ? `<span class="text-amber-400 font-bold">Penuh (${currentUnsurInti}/2) - Pendaftar baru masuk ke Prioritas ${nextPriority}.</span>` : `<span class="text-neonGreen font-bold">Tersedia (${currentUnsurInti}/2)</span>`);
                 } else if (unsur === "Kemenag Internal" || unsur === "Kemenhaj Musi Rawas") {
-                    let nextPriority = totalPrioritasKec + 1;
                     htmlInfo += `Status Awal Anda: <span class="text-neonGreen font-bold">Prioritas ${nextPriority}</span>`;
                 } else {
-                    htmlInfo += `Status Awal Anda: <span class="text-neonGreen font-bold">Tersedia</span>`;
+                    htmlInfo += `Status Awal Anda: <span class="text-neonGreen font-bold">Prioritas ${nextPriority}</span>`;
                 }
             }
             
@@ -1350,6 +1353,7 @@
             document.getElementById('cardKecamatan').innerText = p.Nama_Kecamatan;
             document.getElementById('cardUnsur').innerText = p.Unsur || p.Satker || '-';
             document.getElementById('cardIdReg').innerText = p.ID_Pendaftaran;
+            document.getElementById('cardTimestamp').innerText = p.Timestamp || '-';
             
             let isInti = p.Status_Pemain === 'Inti' || (p.Status_Pemain && p.Status_Pemain.includes('Prioritas'));
             const badge = document.getElementById('cardStatusBadge');
@@ -1361,7 +1365,7 @@
 
             const qrContainer = document.getElementById('qrcodeContainer');
             qrContainer.innerHTML = '';
-            new QRCode(qrContainer, { text: `VERIFIED-HAB-MURA|${p.ID_Pendaftaran}|${p.Nama_Pemain}|${p.Nama_Kecamatan}`, width: 76, height: 76, colorDark: "#0b0f19", colorLight: "#ffffff" });
+            new QRCode(qrContainer, { text: `VERIFIED-HAB-MURA|${p.ID_Pendaftaran}|${p.Nama_Pemain}|${p.Nama_Kecamatan}|${p.Timestamp}`, width: 76, height: 76, colorDark: "#0b0f19", colorLight: "#ffffff" });
             previewBox.classList.remove('hidden');
         }
 

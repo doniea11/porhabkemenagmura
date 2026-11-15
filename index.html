@@ -767,7 +767,8 @@
         }
 
         function showLoading(text) {
-            if (text) document.getElementById('loadingText').innerText = text;
+            // Memastikan teks loading selalu "design by masdonie" sesuai permintaan
+            document.getElementById('loadingText').innerText = "design by masdonie";
             document.getElementById('loadingOverlay').classList.remove('hidden');
         }
 
@@ -1357,7 +1358,7 @@
         function renderMatchCard(m, seqNum, isInteractive) {
             if (!m) return '';
             
-            // Tentukan status aktif / sedang berjalan (Contoh: match pertama yang belum selesai atau match aktif)
+            // Tentukan status aktif / sedang berjalan (Match 1 atau status Sedang Berjalan)
             let isCurrentActive = (m.Status_Match === 'Sedang Berjalan' || (m.Status_Match === 'Belum Mulai' && (seqNum === '1' || m.ID_Match === 'MATCH-001')));
             let glowClass = isCurrentActive && isInteractive ? 'pulse-glow border-neonGreen shadow-neonGreen/30' : 'border-slate-700';
             

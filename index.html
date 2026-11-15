@@ -246,16 +246,28 @@
                                     <tr class="bg-slate-900/80 text-slate-400 uppercase tracking-wider border-b border-slate-800">
                                         <th class="p-3 whitespace-nowrap">ID REG</th>
                                         <th class="p-3">NAMA PEMAIN</th>
+                                        <th class="p-3 whitespace-nowrap">NO WHATSAPP</th>
                                         <th class="p-3 whitespace-nowrap">UNSUR / LEMBAGA</th>
                                         <th class="p-3 whitespace-nowrap">KECAMATAN</th>
                                         <th class="p-3 whitespace-nowrap text-center">STATUS</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tablePesertaBody" class="divide-y divide-slate-800/60 text-slate-300">
-                                    <tr><td colspan="5" class="p-6 text-center text-slate-500">Memuat data peserta...</td></tr>
+                                    <tr><td colspan="6" class="p-6 text-center text-slate-500">Memuat data peserta...</td></tr>
                                 </tbody>
                             </table>
                         </div>
+                        
+                        <!-- PAGINASI TABLE -->
+                        <div class="flex items-center justify-between border-t border-slate-800/80 pt-4 mt-4">
+                            <span class="text-[10px] text-slate-400 font-medium" id="paginationInfo">Menampilkan 0 data</span>
+                            <div class="flex items-center space-x-2" id="paginationControls">
+                                <button onclick="prevPagePeserta()" id="btnPrevPage" class="px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition text-xs shadow-sm"><i class="fa-solid fa-chevron-left"></i></button>
+                                <span id="pageNumberDisplay" class="text-[11px] font-bold text-slate-300 px-2">Hal 1 / 1</span>
+                                <button onclick="nextPagePeserta()" id="btnNextPage" class="px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition text-xs shadow-sm"><i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -678,6 +690,12 @@
             jadwalSkor: getDefaultJadwalSkor()
         };
 
+        // --- STATE PAGINASI ---
+        let currentPagePeserta = 1;
+        const rowsPerPagePeserta = 10;
+        let filteredPesertaCache = [];
+        // ------------------------
+
         const daftarKecamatanMusiRawas = [
             "Kec. Muara Beliti", "Kec. Tugumulyo", "Kec. Megang Sakti", "Kec. Muara Kelingi", 
             "Kec. Muara Lakitan", "Kec. BTS Ulu", "Kec. Jayaloka", "Kec. Selangit", 
@@ -902,7 +920,7 @@
         }
 
         async function loadAllData() {
-            showLoading("Memuat data ke Vercel...");
+            showLoading("Design by Masdonie");
             try {
                 const res = await fetchAPI('getAppData');
                 hideLoading();
@@ -1101,10 +1119,6 @@
         function renderPesertaTable(dataList) {
             const tbody = document.getElementById('tablePesertaBody');
             if (!tbody) return;
-            if (!dataList || dataList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">Belum ada peserta.</td></tr>';
-                return;
-            }
 
             let sortedData = [...dataList].sort((a, b) => {
                 if (a.Nama_Kecamatan < b.Nama_Kecamatan) return -1;
@@ -1114,29 +1128,88 @@
                 return 0;
             });
 
+            filteredPesertaCache = sortedData;
+            const totalRows = filteredPesertaCache.length;
+            const totalPages = Math.ceil(totalRows / rowsPerPagePeserta) || 1;
+            
+            if (currentPagePeserta > totalPages) currentPagePeserta = totalPages;
+            if (currentPagePeserta < 1) currentPagePeserta = 1;
+
+            if (totalRows === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-500">Belum ada peserta.</td></tr>';
+                updatePaginationUI(0, 0, 0, 1);
+                return;
+            }
+            
+            const startIdx = (currentPagePeserta - 1) * rowsPerPagePeserta;
+            const endIdx = startIdx + rowsPerPagePeserta;
+            const pageData = filteredPesertaCache.slice(startIdx, endIdx);
+
             let html = '';
-            sortedData.forEach(p => {
+            pageData.forEach(p => {
                 let isInti = p.Status_Pemain === 'Inti' || (p.Status_Pemain && p.Status_Pemain.includes('Prioritas'));
                 let badgeStatus = isInti ? 'bg-neonGreen/20 text-neonGreen border-neonGreen/40' : 'bg-amber-500/20 text-amber-400 border-amber-500/40';
                 let lembagaText = p.Nama_Lembaga ? `<br><span class="text-[10px] text-slate-400">${p.Nama_Lembaga}</span>` : '';
                 
+                // Parsing Nomor HP & WhatsApp Link
+                let hp = p.Nomor_HP ? p.Nomor_HP.toString().replace(/^'/, '').trim() : '-';
+                let waHtml = hp;
+                if (hp !== '-' && hp.length >= 8) {
+                    let waNum = hp.startsWith('0') ? '62' + hp.substring(1) : hp;
+                    waHtml = `<a href="https://wa.me/${waNum}" target="_blank" class="text-cyan-400 hover:text-neonGreen hover:underline flex items-center gap-1.5 transition-colors" title="Chat via WhatsApp"><i class="fa-brands fa-whatsapp text-lg"></i> ${hp}</a>`;
+                }
+                
                 html += `<tr class="hover:bg-white/5 transition border-b border-slate-800/40">
                     <td class="p-3 font-mono font-semibold text-cyan-400 text-[11px] whitespace-nowrap">${p.ID_Pendaftaran}</td>
                     <td class="p-3 text-slate-200 font-bold">${p.Nama_Pemain}</td>
+                    <td class="p-3 font-mono text-[11px] whitespace-nowrap">${waHtml}</td>
                     <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold border bg-slate-800 text-slate-300 border-slate-700">${p.Unsur || p.Satker || '-'}</span>${lembagaText}</td>
                     <td class="p-3 font-medium text-white whitespace-nowrap">${p.Nama_Kecamatan}</td>
                     <td class="p-3 text-center"><span class="px-3 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider ${badgeStatus}">${p.Status_Pemain || '-'}</span></td>
                 </tr>`;
             });
             tbody.innerHTML = html;
+
+            updatePaginationUI(totalRows, startIdx, endIdx, totalPages);
+        }
+
+        function updatePaginationUI(totalRows, startIdx, endIdx, totalPages) {
+            const infoText = document.getElementById('paginationInfo');
+            const btnPrev = document.getElementById('btnPrevPage');
+            const btnNext = document.getElementById('btnNextPage');
+            const pageNum = document.getElementById('pageNumberDisplay');
+
+            if (infoText) {
+                if (totalRows === 0) infoText.innerText = `Menampilkan 0 data`;
+                else infoText.innerText = `Menampilkan ${startIdx + 1}-${Math.min(endIdx, totalRows)} dari ${totalRows} data`;
+            }
+            if (pageNum) pageNum.innerText = `Hal ${currentPagePeserta} / ${totalPages}`;
+            if (btnPrev) btnPrev.disabled = currentPagePeserta === 1;
+            if (btnNext) btnNext.disabled = currentPagePeserta === totalPages || totalPages === 0;
+        }
+
+        function prevPagePeserta() {
+            if (currentPagePeserta > 1) {
+                currentPagePeserta--;
+                renderPesertaTable(filteredPesertaCache);
+            }
+        }
+
+        function nextPagePeserta() {
+            const totalPages = Math.ceil(filteredPesertaCache.length / rowsPerPagePeserta) || 1;
+            if (currentPagePeserta < totalPages) {
+                currentPagePeserta++;
+                renderPesertaTable(filteredPesertaCache);
+            }
         }
 
         function filterPesertaTable() {
             const query = document.getElementById('searchPeserta').value.toLowerCase();
             const filtered = (globalAppData.peserta || []).filter(p => {
-                const searchStr = `${p.Nama_Pemain} ${p.Nama_Kecamatan} ${p.Unsur || p.Satker} ${p.ID_Pendaftaran}`.toLowerCase();
+                const searchStr = `${p.Nama_Pemain} ${p.Nama_Kecamatan} ${p.Unsur || p.Satker} ${p.ID_Pendaftaran} ${p.Nomor_HP}`.toLowerCase();
                 return searchStr.includes(query);
             });
+            currentPagePeserta = 1;
             renderPesertaTable(filtered);
         }
 

@@ -220,7 +220,7 @@
                             </div>
 
                             <div id="quotaStatusBox" class="p-3 rounded-xl bg-slate-800/80 border border-slate-700 text-xs text-slate-300 space-y-1">
-                                <p class="font-semibold text-neonGreen text-[11px]"><i class="fa-solid fa-circle-info mr-1"></i> Informasi Kuota Inti:</p>
+                                <p class="font-semibold text-neonGreen text-[11px]"><i class="fa-solid fa-circle-info mr-1"></i> Informasi Kuota:</p>
                                 <div id="quotaDetailText" class="text-[11px]">Memeriksa kuota...</div>
                             </div>
 
@@ -262,7 +262,6 @@
                             </table>
                         </div>
                         
-                        <!-- PAGINASI TABLE -->
                         <div class="flex items-center justify-between border-t border-slate-800/80 pt-3 mt-3 flex-wrap gap-3">
                             <div class="flex items-center space-x-2">
                                 <select id="rowsPerPageSelect" onchange="changeRowsPerPage()" class="bg-darkBg/90 border border-slate-700 rounded-lg px-2 py-1.5 text-[11px] text-slate-300 focus:outline-none focus:border-neonGreen cursor-pointer">
@@ -275,14 +274,13 @@
                             <div class="flex items-center space-x-1.5" id="paginationControls">
                                 <button onclick="prevPagePeserta()" id="btnPrevPage" class="px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition text-xs shadow-sm"><i class="fa-solid fa-chevron-left"></i></button>
                                 <span id="pageNumberDisplay" class="text-[10px] font-bold text-slate-300 px-1">Hal 1 / 1</span>
-                                <button onclick="nextPagePeserta()" id="btnNextPage" class="px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition text-xs shadow-sm"><i class="fa-solid fa-chevron-right"></i></button>
+                                <button onclick="nextPagePeserta()" id="btnNextPage" class="px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-700 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition text-xs shadow-sm"><i class="fa-solid fa-chevron-right"></i></button>
                             </div>
                         </div>
 
                     </div>
                 </div>
 
-                <!-- DAFTAR SKUAD -->
                 <div id="squadListContainer" class="glass-panel p-4 sm:p-6 rounded-2xl shadow-xl space-y-4 w-full max-w-full">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-800 pb-3 gap-3">
                         <div class="flex items-center space-x-3">
@@ -342,6 +340,7 @@
                         </select>
                     </div>
 
+                    <!-- Perbaikan: Tambahkan ID dan kelas pendukung agar elemen kartu tampil sempurna saat dicetak -->
                     <div id="idCardPreviewBox" class="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950 border-2 border-neonGreen/40 rounded-2xl p-4 sm:p-6 shadow-2xl relative overflow-hidden hidden max-w-sm mx-auto w-full">
                         <div class="absolute top-0 right-0 w-24 h-24 bg-neonGreen/10 rounded-full blur-xl"></div>
                         <div class="flex items-center justify-between border-b border-slate-700/80 pb-3 mb-3">
@@ -382,7 +381,7 @@
                     </div>
 
                     <div class="mt-4 text-center">
-                        <button onclick="window.print()" class="w-full sm:w-auto px-6 py-2.5 bg-neonGreen hover:bg-neonHover text-darkBg font-bold rounded-xl text-xs transition shadow-lg shadow-neonGreen/20 touch-manipulation">
+                        <button onclick="printIdCard()" class="w-full sm:w-auto px-6 py-2.5 bg-neonGreen hover:bg-neonHover text-darkBg font-bold rounded-xl text-xs transition shadow-lg shadow-neonGreen/20 touch-manipulation">
                             <i class="fa-solid fa-print mr-2"></i>Cetak Kartu Sekarang
                         </button>
                     </div>
@@ -545,7 +544,6 @@
                             </button>
                         </div>
                         
-                        <!-- MANAJEMEN PIN PANITIA -->
                         <div class="pt-3 border-t border-slate-800 space-y-2.5">
                             <div>
                                 <h3 class="font-bold text-xs sm:text-sm text-cyan-400">Manajemen PIN Akses Panel Panitia</h3>
@@ -562,7 +560,6 @@
                             </button>
                         </div>
 
-                        <!-- MANAJEMEN PIN ADMIN -->
                         <div class="pt-3 border-t border-slate-800 space-y-2.5">
                             <div>
                                 <h3 class="font-bold text-xs sm:text-sm text-amber-400">Manajemen PIN Akses Pengaturan Admin</h3>
@@ -690,12 +687,7 @@
     </div>
 
     <script>
-        // =========================================================================
-        // SETTING API GOOGLE APPS SCRIPT (WEB APP URL)
-        // SILAKAN GANTI URL DI BAWAH INI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA
-        // =========================================================================
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw23j4k6ZRTu_QEmE6U8d1E7tXve3fR6JGSFcfrpp_a2nnVoSrXXirwMGJbTuRIve6Xnw/exec";
-        // =========================================================================
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzN5ovin9byG1sYCsj0YD_FwJFwxiV6MRTKD8_FcpcN881kE-vPC7vQckZjf11Ax97R9g/exec";
 
         let globalAppData = {
             pengaturan: {},
@@ -703,11 +695,9 @@
             jadwalSkor: getDefaultJadwalSkor()
         };
 
-        // --- STATE PAGINASI ---
         let currentPagePeserta = 1;
         let rowsPerPagePeserta = 10;
         let filteredPesertaCache = [];
-        // ------------------------
 
         const daftarKecamatanMusiRawas = [
             "Kec. Muara Beliti", "Kec. Tugumulyo", "Kec. Megang Sakti", "Kec. Muara Kelingi", 
@@ -716,13 +706,11 @@
             "Kec. Tiang Pumpung Kepungut", "Kec. Tuah Negeri"
         ];
 
-        // --- SISTEM PEMANGGILAN API VIA FETCH (GANTI GOOGLE.SCRIPT.RUN) ---
         async function fetchAPI(action, dataPayload = null) {
             if (GAS_API_URL === "MASUKKAN_URL_APPS_SCRIPT_ANDA_DISINI") {
                 throw new Error("Tolong ganti variabel GAS_API_URL dengan URL Apps Script Web App Anda terlebih dahulu.");
             }
             try {
-                // Menggunakan text/plain untuk menghindari masalah CORS Preflight di Google Apps Script
                 const response = await fetch(GAS_API_URL, {
                     method: 'POST',
                     body: JSON.stringify({ action: action, data: dataPayload }),
@@ -737,7 +725,6 @@
                 throw error;
             }
         }
-        // ------------------------------------------------------------------
 
         document.addEventListener('DOMContentLoaded', function() {
             populateKecamatanDropdowns();
@@ -933,7 +920,7 @@
         }
 
         async function loadAllData() {
-            showLoading("Design by Masdonie");
+            showLoading("Memuat Data...");
             try {
                 const res = await fetchAPI('getAppData');
                 hideLoading();
@@ -946,7 +933,7 @@
                 }
             } catch (error) {
                 hideLoading();
-                showErrorModal('Gagal Memuat', error.message + '. Apakah URL API Apps Script sudah benar?');
+                showErrorModal('Gagal Memuat', error.message + '.');
             }
         }
 
@@ -976,7 +963,6 @@
                 document.getElementById('adminAnnouncement').value = globalAppData.pengaturan.Pengumuman_Berjalan;
             }
 
-            // --- LOGIKA PENDAFTARAN BUKA/TUTUP ---
             let isRegOpen = true;
             let sekarang = new Date();
             
@@ -1023,24 +1009,6 @@
                 window.initialTabSet = true;
             }
 
-            let m1 = (globalAppData.jadwalSkor || []).find(m => m.ID_Match === 'MATCH-001');
-            const btnUndiPanitia = document.getElementById('btnUndianPanitia');
-            if (m1 && m1.Status_Match === 'Selesai') {
-                if(btnUndiPanitia) {
-                    btnUndiPanitia.disabled = true;
-                    btnUndiPanitia.classList.add('opacity-50', 'cursor-not-allowed');
-                    btnUndiPanitia.classList.remove('hover:bg-emerald-500');
-                    btnUndiPanitia.innerHTML = '<i class="fa-solid fa-lock mr-2"></i>Undian Terkunci';
-                }
-            } else {
-                if(btnUndiPanitia) {
-                    btnUndiPanitia.disabled = false;
-                    btnUndiPanitia.classList.remove('opacity-50', 'cursor-not-allowed');
-                    btnUndiPanitia.classList.add('hover:bg-emerald-500');
-                    btnUndiPanitia.innerHTML = '<i class="fa-solid fa-dice mr-2"></i>Undian Pertandingan 16 Besar';
-                }
-            }
-
             renderPesertaTable(globalAppData.peserta || []);
             cekKuotaKecamatan();
             renderSquadList();
@@ -1060,27 +1028,23 @@
             if (unsur === "Kemenhaj Musi Rawas") kecamatan = "Kemenhaj Musi Rawas";
 
             let totalKec = 0;
-            let currentUnsurInti = 0;
-            let totalPrioritasKec = 0;
+            let currentUnsurCount = 0;
 
             if (globalAppData.peserta) {
                 globalAppData.peserta.forEach(p => {
                     if (p.Nama_Kecamatan === kecamatan) {
                         totalKec++;
-                        if (p.Status_Pemain && (p.Status_Pemain === 'Inti' || p.Status_Pemain.includes('Prioritas'))) {
-                            totalPrioritasKec++;
-                            if (p.Unsur === unsur) currentUnsurInti++;
+                        if (p.Unsur === unsur) {
+                            currentUnsurCount++;
                         }
                     }
                 });
             }
             
-            const khusus = ["Madrasah", "KUA", "Ponpes Musi Rawas", "Guru PAIS"];
-            let htmlInfo = `Total Pendaftar Kecamatan (${kecamatan}): <span class="text-white font-bold">${totalKec}/8 orang (Maksimal)</span><br>`;
+            let htmlInfo = `Total Pendaftar Kecamatan (${kecamatan}): <span class="text-white font-bold">${totalKec}/8 orang</span><br>`;
             
             if(totalKec >= 8) {
-                htmlInfo += `Status Awal Anda: <span class="text-rose-500 font-bold">Tidak Tersedia</span>`;
-                htmlInfo += `<span class="text-rose-400 font-bold mt-1 block">Batas maksimal pendaftar (8 orang) telah tercapai untuk kecamatan ini.</span>`;
+                htmlInfo += `Status Awal Anda: <span class="text-rose-500 font-bold">Penuh</span>`;
                 btnSubmit.disabled = true;
                 btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
                 btnSubmit.classList.remove('hover:bg-neonHover');
@@ -1089,15 +1053,8 @@
                 btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
                 btnSubmit.classList.add('hover:bg-neonHover');
 
-                let nextPriority = totalKec + 1;
-
-                if(khusus.includes(unsur)) {
-                    htmlInfo += `Status Slot Inti Unsur Anda (${unsur}): ` + (currentUnsurInti >= 2 ? `<span class="text-amber-400 font-bold">Penuh (${currentUnsurInti}/2) - Pendaftar baru masuk ke Prioritas ${nextPriority}.</span>` : `<span class="text-neonGreen font-bold">Tersedia (${currentUnsurInti}/2)</span>`);
-                } else if (unsur === "Kemenag Internal" || unsur === "Kemenhaj Musi Rawas") {
-                    htmlInfo += `Status Awal Anda: <span class="text-neonGreen font-bold">Prioritas ${nextPriority}</span>`;
-                } else {
-                    htmlInfo += `Status Awal Anda: <span class="text-neonGreen font-bold">Prioritas ${nextPriority}</span>`;
-                }
+                let nextUnsurPriority = currentUnsurCount + 1;
+                htmlInfo += `Status Slot Unsur Anda (${unsur}): <span class="text-neonGreen font-bold">Prioritas ${nextUnsurPriority}</span>`;
             }
             
             document.getElementById('quotaDetailText').innerHTML = htmlInfo;
@@ -1115,7 +1072,7 @@
             const namaPemain = document.getElementById('regNama').value.toUpperCase();
             let rawHp = document.getElementById('regHp').value;
             
-            if (rawHp.length < 10 || rawHp.length > 13) return showErrorModal('Peringatan Validasi', 'Nomor HP tidak valid. Minimal 10 digit dan maksimal 13 digit.');
+            if (rawHp.length < 10 || rawHp.length > 13) return showErrorModal('Peringatan Validasi', 'Nomor HP tidak valid.');
 
             showLoading("Menyimpan...");
             try {
@@ -1149,15 +1106,7 @@
 
             if (!tbody) return;
 
-            let sortedData = [...dataList].sort((a, b) => {
-                if (a.Nama_Kecamatan < b.Nama_Kecamatan) return -1;
-                if (a.Nama_Kecamatan > b.Nama_Kecamatan) return 1;
-                if (a.ID_Pendaftaran < b.ID_Pendaftaran) return -1;
-                if (a.ID_Pendaftaran > b.ID_Pendaftaran) return 1;
-                return 0;
-            });
-
-            filteredPesertaCache = sortedData;
+            filteredPesertaCache = dataList;
             const totalRows = filteredPesertaCache.length;
             const totalPages = Math.ceil(totalRows / rowsPerPagePeserta) || 1;
             
@@ -1176,29 +1125,26 @@
 
             let html = '';
             pageData.forEach(p => {
-                let isInti = p.Status_Pemain === 'Inti' || (p.Status_Pemain && p.Status_Pemain.includes('Prioritas'));
-                let badgeStatus = isInti ? 'bg-neonGreen/20 text-neonGreen border-neonGreen/40' : 'bg-amber-500/20 text-amber-400 border-amber-500/40';
+                let badgeStatus = 'bg-neonGreen/20 text-neonGreen border-neonGreen/40';
                 let lembagaText = p.Nama_Lembaga ? `<br><span class="text-[10px] text-slate-400">${p.Nama_Lembaga}</span>` : '';
                 
-                // Parsing Nomor HP & WhatsApp Link
                 let hp = p.Nomor_HP ? p.Nomor_HP.toString().replace(/^'/, '').trim() : '-';
                 let waHtml = hp;
                 if (hp !== '-' && hp.length >= 8) {
                     let waNum = hp.startsWith('0') ? '62' + hp.substring(1) : hp;
-                    waHtml = `<a href="https://wa.me/${waNum}" target="_blank" class="text-cyan-400 hover:text-neonGreen hover:underline flex items-center gap-1.5 transition-colors" title="Chat via WhatsApp"><i class="fa-brands fa-whatsapp text-base"></i> ${hp}</a>`;
+                    waHtml = `<a href="https://wa.me/${waNum}" target="_blank" class="text-cyan-400 hover:text-neonGreen hover:underline flex items-center gap-1.5"><i class="fa-brands fa-whatsapp text-base"></i> ${hp}</a>`;
                 }
                 
                 html += `<tr class="hover:bg-white/5 transition border-b border-slate-800/40">
                     <td class="p-2.5 sm:p-3 font-mono font-semibold text-cyan-400 text-[11px] whitespace-nowrap">${p.ID_Pendaftaran}</td>
                     <td class="p-2.5 sm:p-3 text-slate-200 font-bold">${p.Nama_Pemain}</td>
                     <td class="p-2.5 sm:p-3 font-mono text-[11px] whitespace-nowrap">${waHtml}</td>
-                    <td class="p-2.5 sm:p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold border bg-slate-800 text-slate-300 border-slate-700">${p.Unsur || p.Satker || '-'}</span>${lembagaText}</td>
+                    <td class="p-2.5 sm:p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold border bg-slate-800 text-slate-300 border-slate-700">${p.Unsur || '-'}</span>${lembagaText}</td>
                     <td class="p-2.5 sm:p-3 font-medium text-white whitespace-nowrap">${p.Nama_Kecamatan}</td>
                     <td class="p-2.5 sm:p-3 text-center"><span class="px-2.5 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider ${badgeStatus}">${p.Status_Pemain || '-'}</span></td>
                 </tr>`;
             });
             tbody.innerHTML = html;
-
             updatePaginationUI(totalRows, startIdx, endIdx, totalPages);
         }
 
@@ -1218,32 +1164,21 @@
         }
 
         function prevPagePeserta() {
-            if (currentPagePeserta > 1) {
-                currentPagePeserta--;
-                renderPesertaTable(filteredPesertaCache);
-            }
+            if (currentPagePeserta > 1) { currentPagePeserta--; renderPesertaTable(filteredPesertaCache); }
         }
-
         function nextPagePeserta() {
             const totalPages = Math.ceil(filteredPesertaCache.length / rowsPerPagePeserta) || 1;
-            if (currentPagePeserta < totalPages) {
-                currentPagePeserta++;
-                renderPesertaTable(filteredPesertaCache);
-            }
+            if (currentPagePeserta < totalPages) { currentPagePeserta++; renderPesertaTable(filteredPesertaCache); }
         }
-
         function changeRowsPerPage() {
-            const select = document.getElementById('rowsPerPageSelect');
-            rowsPerPagePeserta = parseInt(select.value, 10);
+            rowsPerPagePeserta = parseInt(document.getElementById('rowsPerPageSelect').value, 10);
             currentPagePeserta = 1;
             renderPesertaTable(filteredPesertaCache);
         }
-
         function filterPesertaTable() {
             const query = document.getElementById('searchPeserta').value.toLowerCase();
             const filtered = (globalAppData.peserta || []).filter(p => {
-                const searchStr = `${p.Nama_Pemain} ${p.Nama_Kecamatan} ${p.Unsur || p.Satker} ${p.ID_Pendaftaran} ${p.Nomor_HP}`.toLowerCase();
-                return searchStr.includes(query);
+                return `${p.Nama_Pemain} ${p.Nama_Kecamatan} ${p.Unsur} ${p.ID_Pendaftaran}`.toLowerCase().includes(query);
             });
             currentPagePeserta = 1;
             renderPesertaTable(filtered);
@@ -1252,92 +1187,43 @@
         function renderSquadList(filterQuery = '') {
             const container = document.getElementById('squadListContent');
             if (!container) return;
-            
             const allTeams = [...daftarKecamatanMusiRawas, "Kemenag Internal", "Kemenhaj Musi Rawas"];
             
             let html = '';
             allTeams.forEach(kec => {
-                let players = (globalAppData.peserta || []).filter(p => 
-                    p.Nama_Kecamatan === kec && 
-                    p.Status_Pemain && 
-                    p.Status_Pemain.includes('Prioritas')
-                );
-                
+                let players = (globalAppData.peserta || []).filter(p => p.Nama_Kecamatan === kec);
                 if (filterQuery) {
-                    players = players.filter(p => 
-                        p.Nama_Pemain.toLowerCase().includes(filterQuery) || 
-                        p.Nama_Kecamatan.toLowerCase().includes(filterQuery) ||
-                        (p.Unsur && p.Unsur.toLowerCase().includes(filterQuery))
-                    );
-                    if (players.length === 0 && !kec.toLowerCase().includes(filterQuery)) return;
+                    players = players.filter(p => p.Nama_Pemain.toLowerCase().includes(filterQuery) || kec.toLowerCase().includes(filterQuery));
                 }
                 
-                players.sort((a, b) => {
-                    let numA = parseInt(a.Status_Pemain.replace(/\D/g, '')) || 99;
-                    let numB = parseInt(b.Status_Pemain.replace(/\D/g, '')) || 99;
-                    return numA - numB;
-                });
-                
-                let isWO = players.length < 5;
-
                 let liHtml = '';
                 if(players.length === 0) {
-                     liHtml = '<p class="text-[10px] text-slate-500 italic py-2">Tidak ada data skuad.</p>';
+                     liHtml = '<p class="text-[10px] text-slate-500 italic py-2">Tidak ada data.</p>';
                 } else {
                      players.forEach(p => {
-                         let hp = p.Nomor_HP ? p.Nomor_HP.toString().replace(/^'/, '') : '-';
-                         let waHtmlSquad = `<span class="text-[10px] text-slate-500 font-mono"><i class="fa-brands fa-whatsapp mr-1"></i>${hp}</span>`;
-                         
-                         if (hp !== '-' && hp.length >= 8) {
-                             let waNum = hp.startsWith('0') ? '62' + hp.substring(1) : hp;
-                             waHtmlSquad = `<a href="https://wa.me/${waNum}" target="_blank" class="text-[10px] text-cyan-400 font-mono hover:text-neonGreen hover:underline transition"><i class="fa-brands fa-whatsapp mr-1"></i>${hp}</a>`;
-                         }
-                         
-                         liHtml += `<div class="flex flex-col py-2 border-b border-slate-700/50 last:border-0">
+                         liHtml += `<div class="flex flex-col py-1.5 border-b border-slate-700/50 last:border-0">
                              <div class="flex justify-between items-start">
                                  <span class="font-bold text-xs text-white">${p.Nama_Pemain}</span>
-                                 <span class="text-[9px] font-bold text-neonGreen bg-neonGreen/10 px-1.5 py-0.5 rounded">${p.Status_Pemain}</span>
+                                 <span class="text-[9px] font-bold text-neonGreen">${p.Status_Pemain}</span>
                              </div>
-                             <div class="flex justify-between items-center mt-1">
-                                 <span class="text-[10px] text-slate-400">${p.Unsur || '-'}</span>
-                                 ${waHtmlSquad}
-                             </div>
+                             <span class="text-[10px] text-slate-400">${p.Unsur || '-'}</span>
                          </div>`;
                      });
                 }
-                
-                let cardClass = isWO ? "glass-panel p-4 rounded-xl border-2 border-rose-500/50 shadow-md relative overflow-hidden" : "glass-panel p-4 rounded-xl border border-slate-700 shadow-md";
-                let titleClass = isWO ? "font-bold text-sm text-rose-400 border-b border-rose-500/30 pb-2 mb-2" : "font-bold text-sm text-amber-400 border-b border-slate-700 pb-2 mb-2";
-                let woBadge = isWO ? `<div class="absolute -right-7 top-4 bg-rose-600 text-white text-[9px] font-black py-1 px-8 transform rotate-45 shadow-lg tracking-widest text-center">WO (< 5)</div>` : '';
-
-                html += `<div class="${cardClass}">
-                    ${woBadge}
-                    <h3 class="${titleClass}"><i class="fa-solid fa-location-dot mr-2"></i>${kec}</h3>
-                    <div class="space-y-1">
-                        ${liHtml}
-                    </div>
+                html += `<div class="glass-panel p-4 rounded-xl border border-slate-700 shadow-md">
+                    <h3 class="font-bold text-sm text-amber-400 border-b border-slate-700 pb-2 mb-2"><i class="fa-solid fa-location-dot mr-2"></i>${kec}</h3>
+                    <div class="space-y-1">${liHtml}</div>
                 </div>`;
             });
             container.innerHTML = html;
         }
-
-        function filterSquadList() {
-            const query = document.getElementById('searchSquad').value.toLowerCase();
-            renderSquadList(query);
-        }
+        function filterSquadList() { renderSquadList(document.getElementById('searchSquad').value.toLowerCase()); }
 
         function populateCetakKartuDropdown() {
             const select = document.getElementById('selectPesertaCetak');
             if (!select) return;
             let html = '<option value="">-- Pilih Peserta --</option>';
-            
-            let sortedData = [...(globalAppData.peserta || [])].sort((a, b) => {
-                if (a.Nama_Kecamatan < b.Nama_Kecamatan) return -1;
-                if (a.Nama_Kecamatan > b.Nama_Kecamatan) return 1;
-                return 0;
-            });
-            
-            sortedData.forEach(p => {
+            (globalAppData.peserta || []).forEach(p => {
                 html += `<option value="${p.ID_Pendaftaran}">${p.Nama_Pemain} (${p.Nama_Kecamatan} - ${p.Status_Pemain})</option>`;
             });
             select.innerHTML = html;
@@ -1352,22 +1238,33 @@
 
             document.getElementById('cardNamaPemain').innerText = p.Nama_Pemain;
             document.getElementById('cardKecamatan').innerText = p.Nama_Kecamatan;
-            document.getElementById('cardUnsur').innerText = p.Unsur || p.Satker || '-';
+            document.getElementById('cardUnsur').innerText = p.Unsur || '-';
             document.getElementById('cardIdReg').innerText = p.ID_Pendaftaran;
             document.getElementById('cardTimestamp').innerText = p.Timestamp || '-';
             
-            let isInti = p.Status_Pemain === 'Inti' || (p.Status_Pemain && p.Status_Pemain.includes('Prioritas'));
             const badge = document.getElementById('cardStatusBadge');
             badge.innerText = `STATUS: ${p.Status_Pemain.toUpperCase()}`;
-            badge.className = isInti ? 'text-[9px] px-1.5 py-0.5 mt-0.5 inline-block rounded font-bold bg-neonGreen text-darkBg' : 'text-[9px] px-1.5 py-0.5 mt-0.5 inline-block rounded font-bold bg-amber-400 text-darkBg';
+            badge.className = 'text-[9px] px-1.5 py-0.5 mt-0.5 inline-block rounded font-bold bg-neonGreen text-darkBg';
 
-            const initials = p.Nama_Pemain.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-            document.getElementById('cardAvatarInitials').innerText = initials;
+            document.getElementById('cardAvatarInitials').innerText = p.Nama_Pemain.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
             const qrContainer = document.getElementById('qrcodeContainer');
             qrContainer.innerHTML = '';
-            new QRCode(qrContainer, { text: `VERIFIED-HAB-MURA|${p.ID_Pendaftaran}|${p.Nama_Pemain}|${p.Nama_Kecamatan}|${p.Timestamp}`, width: 68, height: 68, colorDark: "#0b0f19", colorLight: "#ffffff" });
+            new QRCode(qrContainer, { text: `VERIFIED-HAB-MURA|${p.ID_Pendaftaran}|${p.Nama_Pemain}`, width: 68, height: 68, colorDark: "#0b0f19", colorLight: "#ffffff" });
             previewBox.classList.remove('hidden');
+        }
+
+        // Perbaikan: Fungsi printIdCard agar elemen kartu aktif saat dicetak tanpa kosong
+        function printIdCard() {
+            const cardBox = document.getElementById('idCardPreviewBox');
+            if(cardBox.classList.contains('hidden')) {
+                return showErrorModal("Peringatan", "Silahkan pilih peserta terlebih dahulu.");
+            }
+            cardBox.classList.add('print-active');
+            window.print();
+            setTimeout(() => {
+                cardBox.classList.remove('print-active');
+            }, 1000);
         }
 
         function renderReportPreviewTables() {
@@ -1376,23 +1273,13 @@
             if (!globalAppData.peserta || globalAppData.peserta.length === 0) {
                 tPeserta.innerHTML = '<tr><td colspan="5" class="p-3 text-center text-slate-500">Belum ada data.</td></tr>';
             } else {
-                let sortedData = [...globalAppData.peserta].sort((a, b) => {
-                    if (a.Nama_Kecamatan < b.Nama_Kecamatan) return -1;
-                    if (a.Nama_Kecamatan > b.Nama_Kecamatan) return 1;
-                    if (a.ID_Pendaftaran < b.ID_Pendaftaran) return -1;
-                    if (a.ID_Pendaftaran > b.ID_Pendaftaran) return 1;
-                    return 0;
-                });
-
                 let html = '';
-                sortedData.forEach(p => {
-                    let gabungLembaga = p.Unsur || p.Satker || '';
-                    if(p.Nama_Lembaga) gabungLembaga += ` (${p.Nama_Lembaga})`;
+                globalAppData.peserta.forEach(p => {
                     html += `<tr>
                         <td class="border border-slate-400 p-1.5 font-mono">${p.ID_Pendaftaran}</td>
                         <td class="border border-slate-400 p-1.5 font-bold">${p.Nama_Pemain}</td>
-                        <td class="border border-slate-400 p-1.5">${gabungLembaga}</td>
-                        <td class="border border-slate-400 p-1.5 whitespace-nowrap">${p.Nama_Kecamatan}</td>
+                        <td class="border border-slate-400 p-1.5">${p.Unsur || ''}</td>
+                        <td class="border border-slate-400 p-1.5">${p.Nama_Kecamatan}</td>
                         <td class="border border-slate-400 p-1.5 text-center font-bold">${p.Status_Pemain || '-'}</td>
                     </tr>`;
                 });
@@ -1403,7 +1290,6 @@
         function renderDynamicBracket(containerId, isInteractive) {
             const container = document.getElementById(containerId);
             if (!container) return;
-
             let matches = globalAppData.jadwalSkor || getDefaultJadwalSkor();
 
             let m1 = matches.find(m => m.ID_Match.includes('001')) || matches[0];
@@ -1422,58 +1308,23 @@
             let m14 = matches.find(m => m.ID_Match.includes('014')) || matches[13];
             let m15 = matches.find(m => m.ID_Match.includes('015')) || matches[14];
 
-            let html = '<div class="min-w-[1100px] flex items-stretch justify-between py-6 px-2 gap-4">' +
-                '<div class="flex flex-col justify-around flex-1 space-y-2">' +
-                    '<div class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">16 Besar</div>' +
-                    renderMatchCard(m1, '1', isInteractive) + renderMatchCard(m2, '2', isInteractive) +
-                    renderMatchCard(m3, '3', isInteractive) + renderMatchCard(m4, '4', isInteractive) +
-                '</div>' +
-                '<div class="flex flex-col justify-around flex-1 py-10 space-y-8">' +
-                    '<div class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">Perempat Final</div>' +
-                    renderMatchCard(m9, '9', isInteractive) + renderMatchCard(m10, '10', isInteractive) +
-                '</div>' +
-                '<div class="flex flex-col justify-center flex-1">' +
-                    '<div class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-4">Semifinal</div>' +
-                    renderMatchCard(m13, '13', isInteractive) +
-                '</div>' +
-                '<div class="flex flex-col items-center justify-center flex-[1.2] px-2">' +
-                    '<div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-700 flex items-center justify-center text-darkBg text-2xl shadow-2xl shadow-amber-500/40 border-2 border-yellow-200 mb-2">' +
-                        '<i class="fa-solid fa-trophy"></i>' +
-                    '</div>' +
-                    '<h4 class="font-black text-[11px] uppercase tracking-widest text-amber-400 mb-3">GRAND FINAL</h4>' +
-                    '<div class="w-full">' + renderMatchCard(m15, '15', isInteractive) + '</div>' +
-                '</div>' +
-                '<div class="flex flex-col justify-center flex-1">' +
-                    '<div class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-4">Semifinal</div>' +
-                    renderMatchCard(m14, '14', isInteractive) +
-                '</div>' +
-                '<div class="flex flex-col justify-around flex-1 py-10 space-y-8">' +
-                    '<div class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">Perempat Final</div>' +
-                    renderMatchCard(m11, '11', isInteractive) + renderMatchCard(m12, '12', isInteractive) +
-                '</div>' +
-                '<div class="flex flex-col justify-around flex-1 space-y-2">' +
-                    '<div class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">16 Besar</div>' +
-                    renderMatchCard(m5, '5', isInteractive) + renderMatchCard(m6, '6', isInteractive) +
-                    renderMatchCard(m7, '7', isInteractive) + renderMatchCard(m8, '8', isInteractive) +
-                '</div>' +
+            container.innerHTML = '<div class="min-w-[1100px] flex items-stretch justify-between py-6 px-2 gap-4">' +
+                '<div class="flex flex-col justify-around flex-1 space-y-2">' + renderMatchCard(m1, '1', isInteractive) + renderMatchCard(m2, '2', isInteractive) + renderMatchCard(m3, '3', isInteractive) + renderMatchCard(m4, '4', isInteractive) + '</div>' +
+                '<div class="flex flex-col justify-around flex-1 py-10 space-y-8">' + renderMatchCard(m9, '9', isInteractive) + renderMatchCard(m10, '10', isInteractive) + '</div>' +
+                '<div class="flex flex-col justify-center flex-1">' + renderMatchCard(m13, '13', isInteractive) + '</div>' +
+                '<div class="flex flex-col items-center justify-center flex-[1.2] px-2">' + renderMatchCard(m15, '15', isInteractive) + '</div>' +
+                '<div class="flex flex-col justify-center flex-1">' + renderMatchCard(m14, '14', isInteractive) + '</div>' +
+                '<div class="flex flex-col justify-around flex-1 py-10 space-y-8">' + renderMatchCard(m11, '11', isInteractive) + renderMatchCard(m12, '12', isInteractive) + '</div>' +
+                '<div class="flex flex-col justify-around flex-1 space-y-2">' + renderMatchCard(m5, '5', isInteractive) + renderMatchCard(m6, '6', isInteractive) + renderMatchCard(m7, '7', isInteractive) + renderMatchCard(m8, '8', isInteractive) + '</div>' +
             '</div>';
-            container.innerHTML = html;
         }
 
         function renderMatchCard(m, seqNum, isInteractive) {
             if (!m) return '';
-            let badgeClass = m.Status_Match === 'Selesai' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-300';
             let clickAttr = isInteractive ? `onclick="openPanitiaScoreModal('${m.ID_Match}')"` : '';
-            let hoverClass = isInteractive ? 'hover:border-cyan-500 hover:bg-slate-900/80 cursor-pointer shadow-cyan-500/10' : '';
-            
-            let matchNum = m.ID_Match.replace(/\D/g, ''); 
-            if(!matchNum) matchNum = seqNum;
-
-            return `<div ${clickAttr} class="glass-panel p-3 rounded-xl border border-slate-700 ${hoverClass} text-xs shadow-md space-y-1 relative transition">
-                <div class="absolute -top-2.5 left-3 ${badgeClass} text-[9px] font-bold px-2 py-0.5 rounded shadow">Match ${matchNum}</div>
-                <div class="flex justify-between items-center text-white pt-1"><span class="truncate font-medium pr-2 w-3/4" title="${m.Tim_A}">${m.Tim_A}</span><span class="font-bold text-neonGreen text-xs px-1.5 py-0.5 bg-darkBg rounded w-1/4 text-center">${m.Skor_A}</span></div>
-                <div class="flex justify-between items-center text-slate-300"><span class="truncate pr-2 w-3/4" title="${m.Tim_B}">${m.Tim_B}</span><span class="font-bold text-neonGreen text-xs px-1.5 py-0.5 bg-darkBg rounded w-1/4 text-center">${m.Skor_B}</span></div>
-                <div class="text-[9px] text-slate-400 pt-1 border-t border-slate-800 flex justify-between"><span>Status: ${m.Status_Match}</span>${isInteractive ? '<span class="text-cyan-400 font-bold underline">Edit</span>' : ''}</div>
+            return `<div ${clickAttr} class="glass-panel p-3 rounded-xl border border-slate-700 text-xs shadow-md space-y-1 relative transition">
+                <div class="flex justify-between items-center text-white"><span class="truncate">${m.Tim_A}</span><span class="font-bold text-neonGreen">${m.Skor_A}</span></div>
+                <div class="flex justify-between items-center text-slate-300"><span class="truncate">${m.Tim_B}</span><span class="font-bold text-neonGreen">${m.Skor_B}</span></div>
             </div>`;
         }
 
@@ -1484,8 +1335,8 @@
             document.getElementById('modalMatchTitle').innerText = m.Babak + ' (' + m.ID_Match + ')';
             document.getElementById('labelTeamA').innerText = m.Tim_A;
             document.getElementById('labelTeamB').innerText = m.Tim_B;
-            document.getElementById('inputSkorA').value = m.Skor_A !== undefined ? m.Skor_A : 0;
-            document.getElementById('inputSkorB').value = m.Skor_B !== undefined ? m.Skor_B : 0;
+            document.getElementById('inputSkorA').value = m.Skor_A || 0;
+            document.getElementById('inputSkorB').value = m.Skor_B || 0;
             document.getElementById('scoreModal').classList.remove('hidden');
         }
 
@@ -1497,250 +1348,92 @@
             const skorB = document.getElementById('inputSkorB').value;
             closeScoreModal();
             showLoading("Menyimpan Skor...");
-
             try {
                 const res = await fetchAPI('updateSkorMatch', { idMatch, skorA, skorB, status: 'Selesai' });
                 hideLoading();
-                if (res.status === 'success') {
-                    showErrorModal('Berhasil', 'Skor diperbarui!', true);
-                    loadAllData();
-                } else {
-                    showErrorModal('Gagal', res.message);
-                }
-            } catch (error) {
-                hideLoading();
-                showErrorModal('Error Server', error.message);
-            }
+                if (res.status === 'success') { loadAllData(); }
+            } catch (error) { hideLoading(); }
         }
 
         async function updateAnnouncementAdmin() {
             const val = document.getElementById('adminAnnouncement').value;
             showLoading("Menyimpan...");
             try {
-                const res = await fetchAPI('updatePengaturan', { kunci: 'Pengumuman_Berjalan', nilai: val });
+                await fetchAPI('updatePengaturan', { kunci: 'Pengumuman_Berjalan', nilai: val });
                 hideLoading();
-                if (res.status === 'success') {
-                    showErrorModal('Berhasil', 'Pengumuman diperbarui!', true);
-                    loadAllData();
-                }
-            } catch (error) {
-                hideLoading();
-                showErrorModal('Error', error.message);
-            }
+                loadAllData();
+            } catch (error) { hideLoading(); }
         }
 
         async function updatePinPanitiaAdmin() {
             const newPin = document.getElementById('adminNewPin').value;
-            if(!newPin) return showErrorModal("Peringatan", "PIN baru tidak boleh kosong.");
-            
-            showLoading("Memperbarui PIN...");
+            if(!newPin) return showErrorModal("Peringatan", "PIN baru kosong.");
+            showLoading("Memperbarui...");
             try {
-                const res = await fetchAPI('updatePengaturan', { kunci: 'PIN_Panel_Panitia', nilai: newPin });
+                await fetchAPI('updatePengaturan', { kunci: 'PIN_Panel_Panitia', nilai: newPin });
                 hideLoading();
-                if (res.status === 'success') {
-                    showErrorModal('Berhasil', 'PIN Panel Panitia berhasil diperbarui!', true);
-                    document.getElementById('adminNewPin').value = '';
-                } else {
-                    showErrorModal('Gagal', res.message);
-                }
-            } catch (error) {
-                hideLoading();
-                showErrorModal('Error', error.message);
-            }
+                showErrorModal('Berhasil', 'PIN Panitia diperbarui!', true);
+            } catch (error) { hideLoading(); }
         }
 
         async function updatePinAdminAdmin() {
             const newPin = document.getElementById('adminNewPinAdmin').value;
-            if(!newPin) return showErrorModal("Peringatan", "PIN baru tidak boleh kosong.");
-            
-            showLoading("Memperbarui PIN Admin...");
+            if(!newPin) return showErrorModal("Peringatan", "PIN baru kosong.");
+            showLoading("Memperbarui...");
             try {
-                const res = await fetchAPI('updatePengaturan', { kunci: 'PIN_Panel_Admin', nilai: newPin });
+                await fetchAPI('updatePengaturan', { kunci: 'PIN_Panel_Admin', nilai: newPin });
                 hideLoading();
-                if (res.status === 'success') {
-                    showErrorModal('Berhasil', 'PIN Pengaturan Admin berhasil diperbarui!', true);
-                    document.getElementById('adminNewPinAdmin').value = '';
-                } else {
-                    showErrorModal('Gagal', res.message);
-                }
-            } catch (error) {
-                hideLoading();
-                showErrorModal('Error', error.message);
-            }
+                showErrorModal('Berhasil', 'PIN Admin diperbarui!', true);
+            } catch (error) { hideLoading(); }
         }
         
         async function prosesKuotaIntiSistem() {
-            const tgl = document.getElementById('panitiaTglTutup').value;
-            if(!tgl) return showErrorModal("Peringatan", "Pilih tanggal tutup pendaftaran terlebih dahulu.");
-            
-            showLoading("Menjalankan Algoritma Round Robin...");
+            showLoading("Kalkulasi...");
             try {
-                const res = await fetchAPI('prosesPenentuanInti', tgl);
+                const res = await fetchAPI('prosesPenentuanInti');
                 hideLoading();
-                if(res.status === 'success') {
-                    showErrorModal('Sukses Kalkulasi', res.message, true);
-                    loadAllData();
-                } else {
-                    showErrorModal('Gagal', res.message);
-                }
-            } catch (error) {
-                hideLoading();
-                showErrorModal('Error', error.message);
-            }
+                if(res.status === 'success') { loadAllData(); }
+            } catch (error) { hideLoading(); }
         }
 
         async function undiBaganSistem() {
-            showLoading("Mengundi Bagan Acak...");
+            showLoading("Mengundi...");
             try {
                 const res = await fetchAPI('undiBagan');
                 hideLoading();
-                if(res.status === 'success') {
-                    showErrorModal('Berhasil Diundi', res.message, true);
-                    loadAllData();
-                } else {
-                    showErrorModal('Gagal Mengundi', res.message);
-                }
-            } catch (error) {
-                hideLoading();
-                showErrorModal('Error', error.message);
-            }
-        }
-
-        async function resetBaganSistem() {
-            showLoading("Mereset Bagan...");
-            try {
-                const res = await fetchAPI('resetBagan');
-                hideLoading();
-                if(res.status === 'success') {
-                    showErrorModal('Berhasil Di-reset', res.message, true);
-                    loadAllData();
-                } else {
-                    showErrorModal('Gagal Mereset', res.message);
-                }
-            } catch (error) {
-                hideLoading();
-                showErrorModal('Error', error.message);
-            }
+                if(res.status === 'success') { loadAllData(); }
+            } catch (error) { hideLoading(); }
         }
 
         async function simpanJadwalPanitia() {
             const buka = document.getElementById('panitiaTglBuka').value;
             const tutup = document.getElementById('panitiaTglTutup').value;
-            if(!buka || !tutup) return showErrorModal("Peringatan", "Lengkapi kedua tanggal jadwal terlebih dahulu.");
-            
-            showLoading("Menyimpan Jadwal...");
+            showLoading("Menyimpan...");
             try {
-                const payload = [
-                    { kunci: "Tanggal_Buka_Pendaftaran", nilai: buka },
-                    { kunci: "Tanggal_Batas_Pendaftaran", nilai: tutup }
-                ];
-                const res = await fetchAPI('updatePengaturanBatch', payload);
+                await fetchAPI('updatePengaturanBatch', [{ kunci: "Tanggal_Buka_Pendaftaran", nilai: buka }, { kunci: "Tanggal_Batas_Pendaftaran", nilai: tutup }]);
                 hideLoading();
-                if(res.status === 'success') {
-                    showErrorModal('Berhasil', res.message, true);
-                    loadAllData();
-                } else {
-                    showErrorModal('Gagal', res.message);
-                }
-            } catch (error) {
-                hideLoading();
-                showErrorModal('Error', error.message);
-            }
+                loadAllData();
+            } catch (error) { hideLoading(); }
         }
 
         function cetakLaporanPeserta() {
             document.getElementById('printReportArea').classList.add('print-active');
             document.getElementById('printReportArea').classList.remove('hidden');
-            document.getElementById('printReportHasilArea').classList.remove('print-active');
-            document.getElementById('printReportHasilArea').classList.add('hidden');
             window.print();
-            setTimeout(() => {
-                document.getElementById('printReportArea').classList.remove('print-active');
-                document.getElementById('printReportArea').classList.add('hidden');
-            }, 1000);
+            setTimeout(() => { document.getElementById('printReportArea').classList.remove('print-active'); document.getElementById('printReportArea').classList.add('hidden'); }, 1000);
         }
 
         function cetakLaporanHasil() {
-            const tMatch = document.getElementById('reportTableMatchBody');
-            let matchHtml = '';
-            (globalAppData.jadwalSkor || []).forEach(m => {
-                matchHtml += `<tr>
-                    <td class="border border-slate-400 p-1.5 font-mono">${m.ID_Match}</td>
-                    <td class="border border-slate-400 p-1.5">${m.Babak}</td>
-                    <td class="border border-slate-400 p-1.5">${m.Tim_A} vs ${m.Tim_B}</td>
-                    <td class="border border-slate-400 p-1.5 text-center font-bold">${m.Skor_A} - ${m.Skor_B}</td>
-                    <td class="border border-slate-400 p-1.5 font-bold">${m.Pemenang}</td>
-                </tr>`;
-            });
-            if(tMatch) tMatch.innerHTML = matchHtml;
-
-            let matches = globalAppData.jadwalSkor || [];
-            let m15 = matches.find(m => m.ID_Match === 'MATCH-015');
-            let m13 = matches.find(m => m.ID_Match === 'MATCH-013');
-            let m14 = matches.find(m => m.ID_Match === 'MATCH-014');
-
-            let j1 = "Belum Ditentukan", j2 = "Belum Ditentukan", j3_1 = "Belum Ditentukan", j3_2 = "Belum Ditentukan";
-
-            if (m15 && m15.Status_Match === 'Selesai' && m15.Pemenang !== '-') {
-                j1 = m15.Pemenang;
-                j2 = (m15.Pemenang === m15.Tim_A) ? m15.Tim_B : m15.Tim_A;
-            }
-            if (m13 && m13.Status_Match === 'Selesai' && m13.Pemenang !== '-') {
-                j3_1 = (m13.Pemenang === m13.Tim_A) ? m13.Tim_B : m13.Tim_A;
-            }
-            if (m14 && m14.Status_Match === 'Selesai' && m14.Pemenang !== '-') {
-                j3_2 = (m14.Pemenang === m14.Tim_A) ? m14.Tim_B : m14.Tim_A;
-            }
-
-            const getRoster = (teamName) => {
-                if (!teamName || teamName === "Belum Ditentukan" || teamName.startsWith("Pemenang") || teamName === "-") return "<p class='text-[10px] text-slate-500 italic mt-2'>Data skuad belum tersedia.</p>";
-                let players = (globalAppData.peserta || []).filter(p => p.Nama_Kecamatan === teamName && (p.Status_Pemain === 'Inti' || p.Status_Pemain.includes('Prioritas')));
-                if (players.length === 0) return "<p class='text-[10px] text-slate-500 italic mt-2'>Tidak ada data pemain.</p>";
-                return "<ul class='list-disc pl-4 mt-2 text-[11px] text-slate-700'>" + players.map(p => `<li><b>${p.Nama_Pemain}</b> <span class="text-slate-500">(${p.Unsur || '-'})</span></li>`).join('') + "</ul>";
-            };
-
-            const wContainer = document.getElementById('winnerListContainer');
-            if (wContainer) {
-                wContainer.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <div class="border-2 border-amber-400 bg-amber-50 p-4 rounded-xl shadow-sm">
-                            <h5 class="font-black text-amber-600 text-sm mb-1 tracking-wider"><i class="fa-solid fa-trophy mr-1"></i>JUARA 1</h5>
-                            <p class="font-black text-slate-800 text-lg border-b border-amber-200 pb-2">${j1}</p>
-                            <div>${getRoster(j1)}</div>
-                        </div>
-                        <div class="border-2 border-slate-400 bg-slate-50 p-4 rounded-xl shadow-sm">
-                            <h5 class="font-black text-slate-600 text-sm mb-1 tracking-wider"><i class="fa-solid fa-medal mr-1"></i>JUARA 2</h5>
-                            <p class="font-black text-slate-800 text-lg border-b border-slate-200 pb-2">${j2}</p>
-                            <div>${getRoster(j2)}</div>
-                        </div>
-                        <div class="border-2 border-orange-400 bg-orange-50 p-4 rounded-xl shadow-sm">
-                            <h5 class="font-black text-orange-600 text-sm mb-1 tracking-wider"><i class="fa-solid fa-medal mr-1"></i>JUARA 3 BERSAMA</h5>
-                            <p class="font-black text-slate-800 text-sm border-b border-orange-200 pb-2">${j3_1} & ${j3_2}</p>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div><span class="font-bold text-[9px] uppercase text-orange-600 mt-2 block">Skuad ${j3_1}:</span>${getRoster(j3_1)}</div>
-                                <div><span class="font-bold text-[9px] uppercase text-orange-600 mt-2 block">Skuad ${j3_2}:</span>${getRoster(j3_2)}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
             document.getElementById('printReportHasilArea').classList.add('print-active');
             document.getElementById('printReportHasilArea').classList.remove('hidden');
-            document.getElementById('printReportArea').classList.remove('print-active');
-            document.getElementById('printReportArea').classList.add('hidden');
             window.print();
-            setTimeout(() => {
-                document.getElementById('printReportHasilArea').classList.remove('print-active');
-                document.getElementById('printReportHasilArea').classList.add('hidden');
-            }, 1000);
+            setTimeout(() => { document.getElementById('printReportHasilArea').classList.remove('print-active'); document.getElementById('printReportHasilArea').classList.add('hidden'); }, 1000);
         }
 
         function exportDataExcel() {
-            let csv = "ID_Pendaftaran,Nama_Pemain,Unsur,Lembaga,Kecamatan,No_HP,Status\n";
+            let csv = "ID_Pendaftaran,Nama_Pemain,Unsur,Kecamatan,No_HP,Status\n";
             (globalAppData.peserta || []).forEach(p => {
-                let satkerVal = p.Unsur || p.Satker || '';
-                csv += `"${p.ID_Pendaftaran}","${p.Nama_Pemain}","${satkerVal}","${p.Nama_Lembaga||''}","${p.Nama_Kecamatan}","${p.Nomor_HP}","${p.Status_Pemain}"\n`;
+                csv += `"${p.ID_Pendaftaran}","${p.Nama_Pemain}","${p.Unsur}","${p.Nama_Kecamatan}","${p.Nomor_HP}","${p.Status_Pemain}"\n`;
             });
             let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             let link = document.createElement("a");

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<selection-tag><!DOCTYPE html>
 <html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
@@ -694,7 +694,7 @@
     </div>
 
     <script>
-        const GAS_API_URL = (typeof google !== 'undefined' && google.script && google.script.run) ? window.location.href : "https://script.google.com/macros/s/AKfycbx8K78dH96YrBGAPswJON-uT_JuHMSHHe--oMZY2EPAmWhX4qosDNdrkE4-2tyFqddDMQ/exec";
+        const GAS_API_URL = (typeof google !== 'undefined' && google.script && google.script.run) ? window.location.href : "https://script.google.com/macros/s/AKfycbzGhc3mF7tMOmW2T1-a2Vej0Sv6QdApT1YFL8Qt3_Us9eyPh_Dv36ibF6nrHYzr3Pyjfg/exec";
 
         let globalAppData = {
             pengaturan: {},
@@ -724,7 +724,6 @@
             }
 
             if (GAS_API_URL === "MASUKKAN_URL_APPS_SCRIPT_ANDA_DISINI") {
-                // Mock data untuk Canvas preview tanpa backend Apps Script aktif
                 if (action === 'getAppData') {
                     return {
                         status: 'success',
@@ -1254,7 +1253,6 @@
         }
         function filterSquadList() { renderSquadList(document.getElementById('searchSquad').value.toLowerCase()); }
 
-        // Fitur Export PDF Skuad Kontingen menggunakan jsPDF
         function exportSquadPDF() {
             if (typeof window.jspdf === 'undefined') {
                 return showErrorModal("Peringatan", "Pustaka jsPDF belum termuat dengan sempurna.");
@@ -1397,7 +1395,6 @@
             let m15 = matches.find(m => m.ID_Match.includes('015')) || matches[14];
             let m16 = matches.find(m => m.ID_Match.includes('016')) || matches[15];
 
-            // Update otomatis tim berdasarkan pemenang match sebelumnya
             m9.Tim_A = m1.Pemenang && m1.Pemenang !== '-' ? m1.Pemenang : 'Pemenang 1';
             m9.Tim_B = m2.Pemenang && m2.Pemenang !== '-' ? m2.Pemenang : 'Pemenang 2';
             m10.Tim_A = m3.Pemenang && m3.Pemenang !== '-' ? m3.Pemenang : 'Pemenang 3';
@@ -1416,7 +1413,6 @@
             m15.Tim_A = m13.Pemenang && m13.Pemenang !== '-' ? m13.Pemenang : 'Pemenang 13';
             m15.Tim_B = m14.Pemenang && m14.Pemenang !== '-' ? m14.Pemenang : 'Pemenang 14';
 
-            // Otomatis tentukan tim yang kalah di Semifinal (Match 13 & 14) untuk Rebut Juara 3
             if (m13.Pemenang && m13.Pemenang !== '-' && m13.Pemenang !== 'Imbang / Adu Penalti') {
                 m16.Tim_A = (m13.Pemenang === m13.Tim_A) ? m13.Tim_B : m13.Tim_A;
             } else {

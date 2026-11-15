@@ -1394,14 +1394,15 @@
             let m15 = matches.find(m => m.ID_Match.includes('015')) || matches[14];
             let m16 = matches.find(m => m.ID_Match.includes('016')) || matches[15];
 
+            // Otomatisasi pemenang maju ke babak berikutnya
             m9.Tim_A = m1.Pemenang && m1.Pemenang !== '-' ? m1.Pemenang : 'Pemenang 1';
-            m9.Tim_B = m2.Pemenang && m2.Pemenang !== '-' ? m2.Pemenang : 'Pemenang 2';
-            m10.Tim_A = m3.Pemenang && m3.Pemenang !== '-' ? m3.Pemenang : 'Pemenang 3';
-            m10.Tim_B = m4.Pemenang && m4.Pemenang !== '-' ? m4.Pemenang : 'Pemenang 4';
+            m9.Tim_B = m3.Pemenang && m3.Pemenang !== '-' ? m3.Pemenang : 'Pemenang 3';
+            m10.Tim_A = m5.Pemenang && m5.Pemenang !== '-' ? m5.Pemenang : 'Pemenang 5';
+            m10.Tim_B = m7.Pemenang && m7.Pemenang !== '-' ? m7.Pemenang : 'Pemenang 7';
 
-            m11.Tim_A = m5.Pemenang && m5.Pemenang !== '-' ? m5.Pemenang : 'Pemenang 5';
-            m11.Tim_B = m6.Pemenang && m6.Pemenang !== '-' ? m6.Pemenang : 'Pemenang 6';
-            m12.Tim_A = m7.Pemenang && m7.Pemenang !== '-' ? m7.Pemenang : 'Pemenang 7';
+            m11.Tim_A = m2.Pemenang && m2.Pemenang !== '-' ? m2.Pemenang : 'Pemenang 2';
+            m11.Tim_B = m4.Pemenang && m4.Pemenang !== '-' ? m4.Pemenang : 'Pemenang 4';
+            m12.Tim_A = m6.Pemenang && m6.Pemenang !== '-' ? m6.Pemenang : 'Pemenang 6';
             m12.Tim_B = m8.Pemenang && m8.Pemenang !== '-' ? m8.Pemenang : 'Pemenang 8';
 
             m13.Tim_A = m9.Pemenang && m9.Pemenang !== '-' ? m9.Pemenang : 'Pemenang 9';
@@ -1424,17 +1425,45 @@
             }
 
             container.innerHTML = '<div class="min-w-[1150px] flex items-stretch justify-between py-6 px-2 gap-4">' +
-                '<div class="flex flex-col justify-around flex-1 space-y-2">' + renderMatchCard(m1, '1', isInteractive) + renderMatchCard(m2, '2', isInteractive) + renderMatchCard(m3, '3', isInteractive) + renderMatchCard(m4, '4', isInteractive) + '</div>' +
-                '<div class="flex flex-col justify-around flex-1 py-10 space-y-8">' + renderMatchCard(m9, '9', isInteractive) + renderMatchCard(m10, '10', isInteractive) + '</div>' +
-                '<div class="flex flex-col justify-center flex-1">' + renderMatchCard(m13, '13', isInteractive) + '</div>' +
+                // Sisi Kiri (Match 1, 3, 5, 7)
+                '<div class="flex flex-col justify-around flex-1 space-y-2">' +
+                    '<div class="text-[10px] font-bold text-slate-400 text-center uppercase tracking-wider mb-1">16 Besar (Kiri)</div>' +
+                    renderMatchCard(m1, '1', isInteractive) + 
+                    renderMatchCard(m3, '3', isInteractive) + 
+                    renderMatchCard(m5, '5', isInteractive) + 
+                    renderMatchCard(m7, '7', isInteractive) + 
+                '</div>' +
+                '<div class="flex flex-col justify-around flex-1 py-10 space-y-8">' +
+                    '<div class="text-[10px] font-bold text-slate-400 text-center uppercase tracking-wider mb-1">Perempat Final</div>' +
+                    renderMatchCard(m9, '9', isInteractive) + 
+                    renderMatchCard(m10, '10', isInteractive) + 
+                '</div>' +
+                '<div class="flex flex-col justify-center flex-1">' +
+                    '<div class="text-[10px] font-bold text-slate-400 text-center uppercase tracking-wider mb-1">Semifinal</div>' +
+                    renderMatchCard(m13, '13', isInteractive) + 
+                '</div>' +
                 '<div class="flex flex-col items-center justify-center flex-[1.3] px-2 relative space-y-4">' + 
                     '<div class="absolute -top-6 text-amber-400 text-xl animate-bounce" title="Grand Final"><i class="fa-solid fa-trophy"></i></div>' +
-                    '<div class="w-full">' + renderMatchCard(m15, '15', isInteractive, true) + '</div>' +
-                    '<div class="w-full">' + renderMatchCard(m16, '16', isInteractive, false, true) + '</div>' +
+                    '<div class="w-full"><div class="text-[10px] font-bold text-amber-400 text-center uppercase tracking-wider mb-1">Grand Final</div>' + renderMatchCard(m15, '15', isInteractive, true) + '</div>' +
+                    '<div class="w-full"><div class="text-[10px] font-bold text-purple-400 text-center uppercase tracking-wider mb-1">Perebutan Juara 3</div>' + renderMatchCard(m16, '16', isInteractive, false, true) + '</div>' +
                 '</div>' +
-                '<div class="flex flex-col justify-center flex-1">' + renderMatchCard(m14, '14', isInteractive) + '</div>' +
-                '<div class="flex flex-col justify-around flex-1 py-10 space-y-8">' + renderMatchCard(m11, '11', isInteractive) + renderMatchCard(m12, '12', isInteractive) + '</div>' +
-                '<div class="flex flex-col justify-around flex-1 space-y-2">' + renderMatchCard(m5, '5', isInteractive) + renderMatchCard(m6, '6', isInteractive) + renderMatchCard(m7, '7', isInteractive) + renderMatchCard(m8, '8', isInteractive) + '</div>' +
+                '<div class="flex flex-col justify-center flex-1">' +
+                    '<div class="text-[10px] font-bold text-slate-400 text-center uppercase tracking-wider mb-1">Semifinal</div>' +
+                    renderMatchCard(m14, '14', isInteractive) + 
+                '</div>' +
+                '<div class="flex flex-col justify-around flex-1 py-10 space-y-8">' +
+                    '<div class="text-[10px] font-bold text-slate-400 text-center uppercase tracking-wider mb-1">Perempat Final</div>' +
+                    renderMatchCard(m11, '11', isInteractive) + 
+                    renderMatchCard(m12, '12', isInteractive) + 
+                '</div>' +
+                // Sisi Kanan (Match 2, 4, 6, 8)
+                '<div class="flex flex-col justify-around flex-1 space-y-2">' +
+                    '<div class="text-[10px] font-bold text-slate-400 text-center uppercase tracking-wider mb-1">16 Besar (Kanan)</div>' +
+                    renderMatchCard(m2, '2', isInteractive) + 
+                    renderMatchCard(m4, '4', isInteractive) + 
+                    renderMatchCard(m6, '6', isInteractive) + 
+                    renderMatchCard(m8, '8', isInteractive) + 
+                '</div>' +
             '</div>';
         }
 
@@ -1457,7 +1486,7 @@
                 cardClass += "border-slate-700 hover:border-slate-500";
             }
 
-            let badgeTitle = isGrandFinal ? '<span class="text-amber-400 font-bold"><i class="fa-solid fa-trophy mr-1"></i>Grand Final</span>' : (isThirdPlace ? '<span class="text-purple-400 font-bold"><i class="fa-solid fa-medal mr-1"></i>Perebutan Juara 3</span>' : `<span class="font-bold text-cyan-400">Match ${seqNum} (${m.Babak})</span>`);
+            let badgeTitle = isGrandFinal ? '<span class="text-amber-400 font-bold"><i class="fa-solid fa-trophy mr-1"></i>Final</span>' : (isThirdPlace ? '<span class="text-purple-400 font-bold"><i class="fa-solid fa-medal mr-1"></i>3 & 4</span>' : `<span class="font-bold text-cyan-400">Match ${seqNum}</span>`);
 
             return `<div ${clickAttr} class="${cardClass}">
                 <div class="flex justify-between items-center text-[10px] text-slate-400 border-b border-slate-800 pb-1">

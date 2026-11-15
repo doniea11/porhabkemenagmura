@@ -164,7 +164,7 @@
 
             <div id="loadingOverlay" class="fixed inset-0 bg-darkBg/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center hidden p-4">
                 <div class="w-12 h-12 border-4 border-neonGreen border-t-transparent rounded-full animate-spin mb-3"></div>
-                <p id="loadingText" class="text-xs sm:text-sm font-medium text-neonGreen text-center">Design by Masdonie</p>
+                <p id="loadingText" class="text-xs sm:text-sm font-medium text-neonGreen text-center">design by masdonie</p>
             </div>
 
             <!-- VIEW PENDAFTARAN -->
@@ -686,7 +686,7 @@
     </div>
 
     <script>
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxHCko7dEzeFaytBVBOrzLF2nGCS98xQ5Y-I470AEPR8yS0IO4wbOwkqwFT-lDGzR5GSQ/exec";
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwREPELx0otFxh1imot_b7Ki_-zcoRk0iLQt0E6jKWICd7qTuRN-yzv8SI3ftMR8hJSxg/exec";
 
         let globalAppData = {
             pengaturan: {},
@@ -1356,9 +1356,32 @@
 
         function renderMatchCard(m, seqNum, isInteractive) {
             if (!m) return '';
-            let clickAttr = isInteractive ? `onclick="openPanitiaScoreModal('${m.ID_Match}')"` : '';
-            let statusBadge = m.Status_Match === 'Selesai' ? '<span class="text-[9px] text-neonGreen font-semibold"><i class="fa-solid fa-check mr-0.5"></i> Selesai</span>' : '<span class="text-[9px] text-slate-400">Belum Mulai</span>';
-            return `<div ${clickAttr} class="glass-panel p-3 rounded-xl border border-slate-700 text-xs shadow-md space-y-1.5 relative transition hover:border-neonGreen cursor-pointer text-left">
+            
+            // Tentukan status aktif / sedang berjalan (Contoh: match pertama yang belum selesai atau match aktif)
+            let isCurrentActive = (m.Status_Match === 'Sedang Berjalan' || (m.Status_Match === 'Belum Mulai' && (seqNum === '1' || m.ID_Match === 'MATCH-001')));
+            let glowClass = isCurrentActive && isInteractive ? 'pulse-glow border-neonGreen shadow-neonGreen/30' : 'border-slate-700';
+            
+            let clickAttr = '';
+            if (isInteractive) {
+                if (isCurrentActive) {
+                    clickAttr = `onclick="openPanitiaScoreModal('${m.ID_Match}')"`;
+                } else {
+                    clickAttr = `onclick="showErrorModal('Akses Ditunda', 'Pertandingan ini masih disable. Panitia hanya dapat menginput skor pada pertandingan yang sedang berjalan.')"`;
+                }
+            }
+
+            let statusBadge = '';
+            if (m.Status_Match === 'Selesai') {
+                statusBadge = '<span class="text-[9px] text-neonGreen font-semibold"><i class="fa-solid fa-check mr-0.5"></i> Selesai</span>';
+            } else if (isCurrentActive && isInteractive) {
+                statusBadge = '<span class="text-[9px] text-cyan-400 font-bold animate-pulse">Sedang Berjalan</span>';
+            } else {
+                statusBadge = '<span class="text-[9px] text-slate-500">Disable / Menunggu</span>';
+            }
+
+            let cardOpacity = (!isCurrentActive && isInteractive) ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:border-neonGreen';
+
+            return `<div ${clickAttr} class="glass-panel p-3 rounded-xl border ${glowClass} text-xs shadow-md space-y-1.5 relative transition ${cardOpacity} text-left">
                 <div class="flex justify-between items-center text-[10px] text-slate-400 border-b border-slate-800 pb-1">
                     <span class="font-bold text-cyan-400">Match ${seqNum}</span>
                     ${statusBadge}

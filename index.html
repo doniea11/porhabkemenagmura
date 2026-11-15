@@ -1306,23 +1306,65 @@
             let m14 = matches.find(m => m.ID_Match.includes('014')) || matches[13];
             let m15 = matches.find(m => m.ID_Match.includes('015')) || matches[14];
 
-            container.innerHTML = '<div class="min-w-[1100px] flex items-stretch justify-between py-6 px-2 gap-4">' +
-                '<div class="flex flex-col justify-around flex-1 space-y-2">' + renderMatchCard(m1, '1', isInteractive) + renderMatchCard(m2, '2', isInteractive) + renderMatchCard(m3, '3', isInteractive) + renderMatchCard(m4, '4', isInteractive) + '</div>' +
-                '<div class="flex flex-col justify-around flex-1 py-10 space-y-8">' + renderMatchCard(m9, '9', isInteractive) + renderMatchCard(m10, '10', isInteractive) + '</div>' +
-                '<div class="flex flex-col justify-center flex-1">' + renderMatchCard(m13, '13', isInteractive) + '</div>' +
-                '<div class="flex flex-col items-center justify-center flex-[1.2] px-2">' + renderMatchCard(m15, '15', isInteractive) + '</div>' +
-                '<div class="flex flex-col justify-center flex-1">' + renderMatchCard(m14, '14', isInteractive) + '</div>' +
-                '<div class="flex flex-col justify-around flex-1 py-10 space-y-8">' + renderMatchCard(m11, '11', isInteractive) + renderMatchCard(m12, '12', isInteractive) + '</div>' +
-                '<div class="flex flex-col justify-around flex-1 space-y-2">' + renderMatchCard(m5, '5', isInteractive) + renderMatchCard(m6, '6', isInteractive) + renderMatchCard(m7, '7', isInteractive) + renderMatchCard(m8, '8', isInteractive) + '</div>' +
+            container.innerHTML = '<div class="min-w-[1100px] grid grid-cols-7 gap-4 py-4 px-2 text-center">' +
+                // Kolom Kiri: 16 Besar (Kiri) -> Match 1, 3, 5, 7
+                '<div class="flex flex-col space-y-3">' +
+                    '<h4 class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider mb-1">16 Besar (Kiri)</h4>' +
+                    renderMatchCard(m1, '1', isInteractive) +
+                    renderMatchCard(m3, '3', isInteractive) +
+                    renderMatchCard(m5, '5', isInteractive) +
+                    renderMatchCard(m7, '7', isInteractive) +
+                '</div>' +
+                // Kolom Perempat Final Kiri
+                '<div class="flex flex-col justify-around py-6">' +
+                    '<h4 class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider mb-1">Perempat Final</h4>' +
+                    renderMatchCard(m9, '9', isInteractive) +
+                    renderMatchCard(m10, '10', isInteractive) +
+                '</div>' +
+                // Kolom Semifinal Kiri
+                '<div class="flex flex-col justify-center">' +
+                    '<h4 class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider mb-1">Semifinal</h4>' +
+                    renderMatchCard(m13, '13', isInteractive) +
+                '</div>' +
+                // Kolom Grand Final di Tengah
+                '<div class="flex flex-col items-center justify-center">' +
+                    '<div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mb-2 border border-amber-500/40 shadow-lg"><i class="fa-solid fa-trophy text-base"></i></div>' +
+                    '<h4 class="text-[11px] font-black text-amber-400 uppercase tracking-wider mb-1">Grand Final</h4>' +
+                    renderMatchCard(m15, '15', isInteractive) +
+                '</div>' +
+                // Kolom Semifinal Kanan
+                '<div class="flex flex-col justify-center">' +
+                    '<h4 class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider mb-1">Semifinal</h4>' +
+                    renderMatchCard(m14, '14', isInteractive) +
+                '</div>' +
+                // Kolom Perempat Final Kanan
+                '<div class="flex flex-col justify-around py-6">' +
+                    '<h4 class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider mb-1">Perempat Final</h4>' +
+                    renderMatchCard(m11, '11', isInteractive) +
+                    renderMatchCard(m12, '12', isInteractive) +
+                '</div>' +
+                // Kolom Kanan: 16 Besar (Kanan) -> Match 2, 4, 6, 8
+                '<div class="flex flex-col space-y-3">' +
+                    '<h4 class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider mb-1">16 Besar (Kanan)</h4>' +
+                    renderMatchCard(m2, '2', isInteractive) +
+                    renderMatchCard(m4, '4', isInteractive) +
+                    renderMatchCard(m6, '6', isInteractive) +
+                    renderMatchCard(m8, '8', isInteractive) +
+                '</div>' +
             '</div>';
         }
 
         function renderMatchCard(m, seqNum, isInteractive) {
             if (!m) return '';
             let clickAttr = isInteractive ? `onclick="openPanitiaScoreModal('${m.ID_Match}')"` : '';
-            return `<div ${clickAttr} class="glass-panel p-3 rounded-xl border border-slate-700 text-xs shadow-md space-y-1 relative transition">
-                <div class="flex justify-between items-center text-white"><span class="truncate">${m.Tim_A}</span><span class="font-bold text-neonGreen">${m.Skor_A}</span></div>
-                <div class="flex justify-between items-center text-slate-300"><span class="truncate">${m.Tim_B}</span><span class="font-bold text-neonGreen">${m.Skor_B}</span></div>
+            let statusBadge = m.Status_Match === 'Selesai' ? '<span class="text-[9px] text-neonGreen font-semibold"><i class="fa-solid fa-check mr-0.5"></i> Selesai</span>' : '<span class="text-[9px] text-slate-400">Belum Mulai</span>';
+            return `<div ${clickAttr} class="glass-panel p-3 rounded-xl border border-slate-700 text-xs shadow-md space-y-1.5 relative transition hover:border-neonGreen cursor-pointer text-left">
+                <div class="flex justify-between items-center text-[10px] text-slate-400 border-b border-slate-800 pb-1">
+                    <span class="font-bold text-cyan-400">Match ${seqNum}</span>
+                    ${statusBadge}
+                </div>
+                <div class="flex justify-between items-center text-white"><span class="truncate pr-2">${m.Tim_A}</span><span class="font-bold text-neonGreen font-mono bg-darkBg/60 px-2 py-0.5 rounded border border-slate-800">${m.Skor_A}</span></div>
+                <div class="flex justify-between items-center text-slate-300"><span class="truncate pr-2">${m.Tim_B}</span><span class="font-bold text-neonGreen font-mono bg-darkBg/60 px-2 py-0.5 rounded border border-slate-800">${m.Skor_B}</span></div>
             </div>`;
         }
 

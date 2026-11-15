@@ -1533,7 +1533,6 @@
             const m = (globalAppData.jadwalSkor || []).find(item => item.ID_Match === idMatch);
             if (!m) return;
             
-            // Cek jika match sudah selesai, panitia butuh izin admin untuk revisi
             if (m.Status_Match === 'Selesai') {
                 if (!window.approvedRevisiMatch || !window.approvedRevisiMatch.includes(idMatch)) {
                     return showRevisiApprovalModal(idMatch);
@@ -1544,8 +1543,9 @@
             document.getElementById('modalMatchTitle').innerText = m.Babak + ' (' + m.ID_Match + ')';
             document.getElementById('labelTeamA').innerText = m.Tim_A;
             document.getElementById('labelTeamB').innerText = m.Tim_B;
-            document.getElementById('inputSkorA').value = m.Skor_A || 0;
-            document.getElementById('inputSkorB').value = m.Skor_B || 0;
+            // Memastikan nilai 0 (nol) tampil dengan benar sebagai default
+            document.getElementById('inputSkorA').value = (m.Skor_A !== undefined && m.Skor_A !== '') ? m.Skor_A : 0;
+            document.getElementById('inputSkorB').value = (m.Skor_B !== undefined && m.Skor_B !== '') ? m.Skor_B : 0;
             document.getElementById('scoreModal').classList.remove('hidden');
         }
 
@@ -1596,8 +1596,9 @@
 
         async function submitPanitiaScore() {
             const idMatch = document.getElementById('activeMatchId').value;
-            const skorA = document.getElementById('inputSkorA').value;
-            const skorB = document.getElementById('inputSkorB').value;
+            // Pastikan nilai kosong/undefined otomatis menjadi angka 0
+            const skorA = parseInt(document.getElementById('inputSkorA').value) || 0;
+            const skorB = parseInt(document.getElementById('inputSkorB').value) || 0;
             closeScoreModal();
             showLoading("Design by Masdonie");
             try {

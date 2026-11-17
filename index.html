@@ -5,136 +5,240 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pekor HAB Kemenag Musi Rawas 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #0b0f19; color: #f1f5f9; font-family: sans-serif; }
-        .glass-card { background: rgba(21, 27, 38, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 255, 170, 0.4); } 70% { box-shadow: 0 0 0 12px rgba(0, 255, 170, 0); } }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
+        .glass-card { background: rgba(21, 27, 38, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .pulse-glow { animation: pulseGlow 2s infinite; }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 170, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 170, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 170, 0); }
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col md:flex-row">
-    <!-- Sidebar -->
-    <aside class="w-72 glass-card border-r border-slate-800 flex flex-col justify-between p-4 hidden md:flex min-h-screen">
-        <div>
-            <div class="flex items-center space-x-3 pb-4 border-b border-slate-800">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00ffaa] to-emerald-600 flex items-center justify-center text-[#0b0f19] font-bold text-xl">⚽</div>
-                <div><h1 class="font-bold text-sm text-white">FUTSAL HAB 🏆</h1><p class="text-[10px] text-slate-400">Kemenag Musi Rawas</p></div>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-[#0b0f19]/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center hidden">
+        <div class="w-12 h-12 border-4 border-[#00ffaa] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p id="loadingText" class="text-sm font-medium text-[#00ffaa] tracking-wider uppercase">design by masdonie</p>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="flex flex-1">
+        <!-- Sidebar -->
+        <aside class="w-64 glass-card border-r border-white/5 flex flex-col hidden lg:flex">
+            <div class="p-6 border-b border-white/5 flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00ffaa] to-emerald-600 flex items-center justify-center text-[#0b0f19] font-bold text-xl shadow-lg">⚽</div>
+                <div>
+                    <h1 class="font-bold text-sm text-white">FUTSAL HAB 🏆</h1>
+                    <p class="text-xs text-gray-400">Kemenag Musi Rawas</p>
+                </div>
             </div>
-            <nav class="space-y-2 mt-4">
-                <button onclick="switchTab('peserta')" id="nav-peserta" class="w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold bg-[#00ffaa]/10 text-[#00ffaa]">👥 Form & Skuad Peserta</button>
-                <button onclick="switchTab('cetak')" id="nav-cetak" class="w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/5">🖨️ Cetak Kartu Peserta</button>
-                <button onclick="switchTab('bagan')" id="nav-bagan" class="w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/5">📊 Bagan Pertandingan</button>
-                <button onclick="requestPanitiaAccess()" id="nav-panitia" class="w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/5 border border-slate-800">⚡ Panel Panitia</button>
-                <button onclick="requestAdminAccess()" id="nav-admin" class="w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/5 border border-slate-800">⚙️ Pengaturan Admin</button>
+
+            <nav class="flex-1 p-4 space-y-6 overflow-y-auto">
+                <div>
+                    <p class="px-3 text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Menu Utama</p>
+                    <div class="space-y-1">
+                        <button onclick="switchTab('peserta')" id="nav-peserta" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all bg-[#00ffaa]/10 text-[#00ffaa] border border-[#00ffaa]/20">
+                            <span>👥</span><span>Form & Skuad Peserta</span>
+                        </button>
+                        <button onclick="switchTab('cetak')" id="nav-cetak" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-white/5 hover:text-white transition-all">
+                            <span>🖨️</span><span>Cetak Kartu Peserta</span>
+                        </button>
+                        <button onclick="switchTab('bagan')" id="nav-bagan" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-white/5 hover:text-white transition-all">
+                            <span>📊</span><span>Bagan Pertandingan</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="px-3 text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Manajemen & Sistem</p>
+                    <div class="space-y-1">
+                        <button onclick="switchTab('panitia')" id="nav-panitia" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-white/5 hover:text-white transition-all">
+                            <span>⚡</span><span>Panel Panitia</span>
+                        </button>
+                        <button onclick="switchTab('admin')" id="nav-admin" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-white/5 hover:text-white transition-all">
+                            <span>⚙️</span><span>Pengaturan Admin</span>
+                        </button>
+                    </div>
+                </div>
             </nav>
-        </div>
-        <div class="text-[10px] text-slate-500">&copy; 2026 by Masdonie</div>
-    </aside>
 
-    <!-- Content Area -->
-    <main class="flex-1 flex flex-col min-h-screen overflow-x-hidden">
-        <header class="h-16 glass-card border-b border-slate-800 px-6 flex items-center justify-between sticky top-0 z-30">
-            <span class="text-xs font-medium text-slate-400">Pekan Olahraga HAB Kemenag Kabupaten Musi Rawas 2026</span>
-            <button onclick="loadAppData()" class="px-3 py-1.5 rounded-lg bg-white/5 text-xs text-slate-300 border border-white/10">🔄 Refresh</button>
-        </header>
+            <div class="p-4 border-t border-white/5 text-xs text-gray-500 flex justify-between items-center">
+                <span>&copy;2026 by Masdonie</span>
+                <span class="text-[#00ffaa]">Musi Rawas</span>
+            </div>
+        </aside>
 
-        <!-- Loading Overlay -->
-        <div id="loadingOverlay" class="fixed inset-0 bg-[#0b0f19]/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center hidden">
-            <div class="w-12 h-12 border-4 border-[#00ffaa] border-t-transparent rounded-full animate-spin mb-3"></div>
-            <p id="loadingText" class="text-sm font-medium text-[#00ffaa] uppercase tracking-wider">design by masdonie</p>
-        </div>
+        <!-- Content Area -->
+        <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+            <header class="h-16 glass-card border-b border-white/5 px-6 flex items-center justify-between sticky top-0 z-30">
+                <div class="text-xs font-medium text-gray-400">
+                    Selamat Datang di Pekan Olahraga HAB Kemenag Kabupaten Musi Rawas 2026
+                </div>
+                <button onclick="loadAppData()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-medium text-gray-300 border border-white/10 transition-all">
+                    🔄 Refresh Data
+                </button>
+            </header>
 
-        <div class="p-6 max-w-7xl w-full mx-auto space-y-6">
-            <!-- TAB PESERTA -->
-            <div id="view-peserta" class="space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="glass-card p-6 rounded-2xl shadow-xl">
-                        <h2 class="text-base font-bold text-white mb-4">Form Pendaftaran Skuad</h2>
-                        <form id="formPendaftaran" onsubmit="handleFormSubmit(event)" class="space-y-4">
-                            <div><label class="block text-xs font-semibold text-slate-300 mb-1">Nama Pemain</label><input type="text" id="namaPemain" required class="w-full bg-[#0b0f19] border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:border-[#00ffaa]"></div>
-                            <div><label class="block text-xs font-semibold text-slate-300 mb-1">No WhatsApp</label><input type="text" id="noHp" required minlength="10" maxlength="13" class="w-full bg-[#0b0f19] border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:border-[#00ffaa]" value="08"></div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1">Kecamatan / Instansi</label>
-                                <select id="kecamatan" class="w-full bg-[#0b0f19] border border-slate-700 rounded-xl px-4 py-2 text-sm text-white">
-                                    <option value="Kec. Tugumulyo">Kec. Tugumulyo</option>
-                                    <option value="Kec. Muara Beliti">Kec. Muara Beliti</option>
-                                    <option value="Kec. Megang Sakti">Kec. Megang Sakti</option>
-                                </select>
+            <div class="p-6 flex-1 max-w-7xl w-full mx-auto">
+                <!-- 1. TAB PESERTA -->
+                <div id="view-peserta" class="space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="glass-card p-6 rounded-2xl shadow-xl lg:col-span-1">
+                            <h2 class="text-base font-bold text-white mb-1">Form Pendaftaran Skuad</h2>
+                            <p class="text-xs text-gray-400 mb-6">Daftarkan pemain futsal per kontingen/kecamatan.</p>
+
+                            <form id="formPendaftaran" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-300 mb-1.5">Nama Pemain</label>
+                                    <input type="text" id="namaPemain" required placeholder="Contoh: Suprianto" class="w-full bg-[#0b0f19] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#00ffaa]">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-300 mb-1.5">Nomor WhatsApp</label>
+                                    <input type="text" id="noHp" required minlength="10" maxlength="13" placeholder="Contoh: 081276373676" class="w-full bg-[#0b0f19] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#00ffaa]" value="08">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-300 mb-1.5">Kecamatan / Instansi</label>
+                                    <select id="kecamatan" class="w-full bg-[#0b0f19] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#00ffaa]">
+                                        <option value="Kec. Tugumulyo">Kec. Tugumulyo</option>
+                                        <option value="Kec. Muara Beliti">Kec. Muara Beliti</option>
+                                        <option value="Kec. Megang Sakti">Kec. Megang Sakti</option>
+                                        <option value="Kec. Muara Kelingi">Kec. Muara Kelingi</option>
+                                        <option value="Kec. Muara Lakitan">Kec. Muara Lakitan</option>
+                                        <option value="Kec. BTS Ulu">Kec. BTS Ulu</option>
+                                        <option value="Kec. Purwodadi">Kec. Purwodadi</option>
+                                        <option value="Kec. Sumber Harta">Kec. Sumber Harta</option>
+                                        <option value="Kec. Jayaloka">Kec. Jayaloka</option>
+                                        <option value="Kec. Selangit">Kec. Selangit</option>
+                                        <option value="Kec. STL Ulu Terawas">Kec. STL Ulu Terawas</option>
+                                        <option value="Kec. Sukakarya">Kec. Sukakarya</option>
+                                        <option value="Kec. Tiang Pumpung Kepungut">Kec. Tiang Pumpung Kepungut</option>
+                                        <option value="Kec. Tuah Negeri">Kec. Tuah Negeri</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-[#00ffaa] to-emerald-500 text-[#0b0f19] font-bold text-sm shadow-lg">
+                                    Simpan & Daftarkan Skuad
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="glass-card p-6 rounded-2xl shadow-xl lg:col-span-2 flex flex-col">
+                            <h2 class="text-base font-bold text-white mb-2">Daftar Kontingen & Pemain</h2>
+                            <div class="flex-1 overflow-x-auto min-h-[300px]">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-white/5 text-gray-400 uppercase">
+                                        <tr>
+                                            <th class="p-3">ID Reg</th>
+                                            <th class="p-3">Nama Pemain</th>
+                                            <th class="p-3">WhatsApp</th>
+                                            <th class="p-3">Kecamatan</th>
+                                            <th class="p-3">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pesertaTableBody" class="divide-y divide-white/5 text-gray-300">
+                                        <tr><td colspan="5" class="p-6 text-center text-gray-500">Memuat data kontingen...</td></tr>
+                                    </tbody>
+                                </table>
                             </div>
-                            <button type="submit" class="w-full py-3 rounded-xl bg-[#00ffaa] text-[#0b0f19] font-bold text-sm shadow-lg">Simpan Skuad</button>
-                        </form>
-                    </div>
-                    <div class="glass-card p-6 rounded-2xl shadow-xl lg:col-span-2 overflow-x-auto">
-                        <h2 class="text-base font-bold text-white mb-4">Daftar Kontingen & Pemain</h2>
-                        <table class="w-full text-left text-xs">
-                            <thead class="text-slate-400 border-b border-slate-800">
-                                <tr><th class="p-3">ID Reg</th><th class="p-3">Nama Pemain</th><th class="p-3">WhatsApp</th><th class="p-3">Kecamatan</th><th class="p-3">Status</th></tr>
-                            </thead>
-                            <tbody id="pesertaTableBody" class="divide-y divide-slate-800"><tr><td colspan="5" class="p-4 text-center text-slate-500">Memuat data...</td></tr></tbody>
-                        </table>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- TAB BAGAN -->
-            <div id="view-bagan" class="space-y-6 hidden">
-                <div class="glass-card p-6 rounded-2xl shadow-xl overflow-x-auto">
-                    <h2 class="text-base font-bold text-white mb-4">Bagan Pertandingan Futsal</h2>
-                    <div id="bracketTreeContainer" class="flex space-x-6 min-w-[900px] py-4"></div>
-                    <div id="podiumContainer" class="mt-8 pt-6 border-t border-slate-800 hidden text-center">
-                        <h3 class="text-sm font-bold text-[#00ffaa] mb-4">🏆 Podium Juara Turnamen</h3>
-                        <div class="grid grid-cols-3 gap-4 max-w-xl mx-auto" id="podiumCards"></div>
+                <!-- 2. TAB CETAK KARTU -->
+                <div id="view-cetak" class="space-y-6 hidden">
+                    <div class="glass-card p-6 rounded-2xl shadow-xl max-w-xl mx-auto space-y-4">
+                        <h2 class="text-base font-bold text-white">Cetak Kartu Peserta</h2>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Pilih Pemain</label>
+                            <select id="selectPesertaCetak" onchange="generateIdCardPreview()" class="w-full bg-[#0b0f19] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white">
+                                <option value="">-- Pilih Peserta --</option>
+                            </select>
+                        </div>
+                        <div id="idCardPreviewBox" class="bg-slate-900 border border-[#00ffaa]/40 rounded-2xl p-6 hidden max-w-sm mx-auto space-y-3">
+                            <div class="flex justify-between border-b border-white/10 pb-2">
+                                <span class="text-xs font-bold text-[#00ffaa]">HAB KEMENAG MURA</span>
+                                <span class="text-xs text-gray-400" id="cardIdReg">REG-001</span>
+                            </div>
+                            <h3 id="cardNama" class="text-lg font-bold text-white">Nama Pemain</h3>
+                            <p id="cardKec" class="text-xs text-[#00ffaa]">Kecamatan</p>
+                        </div>
+                        <button onclick="window.print()" class="w-full py-2.5 rounded-xl bg-[#00ffaa] text-[#0b0f19] font-bold text-xs">Cetak Kartu</button>
+                    </div>
+                </div>
+
+                <!-- 3. TAB BAGAN -->
+                <div id="view-bagan" class="space-y-6 hidden">
+                    <div class="glass-card p-6 rounded-2xl shadow-xl overflow-x-auto">
+                        <h2 class="text-base font-bold text-white mb-6">Bagan Turnamen Futsal</h2>
+                        <div id="bracketTreeContainer" class="flex space-x-6 min-w-[1100px] py-4"></div>
+                        <div id="podiumContainer" class="mt-12 pt-8 border-t border-white/10 hidden text-center">
+                            <h3 class="text-sm font-bold text-[#00ffaa] uppercase tracking-wider mb-6">🏆 Podium Juara Turnamen Futsal</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto" id="podiumCards"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. TAB PANITIA -->
+                <div id="view-panitia" class="space-y-6 hidden">
+                    <div class="glass-card p-6 rounded-2xl shadow-xl">
+                        <h2 class="text-base font-bold text-white mb-4">Panel Kontrol Panitia (Input Skor Berurutan)</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="panitiaMatchGrid"></div>
+                    </div>
+                </div>
+
+                <!-- 5. TAB ADMIN -->
+                <div id="view-admin" class="space-y-6 hidden">
+                    <div class="glass-card p-6 rounded-2xl shadow-xl space-y-4 max-w-md">
+                        <h2 class="text-base font-bold text-white">Pengaturan Admin</h2>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Ganti PIN Panel Panitia</label>
+                            <input type="password" id="adminNewPin" placeholder="••••" class="w-full bg-[#0b0f19] border border-white/10 rounded-xl px-4 py-2 text-sm text-white font-mono">
+                        </div>
+                        <button onclick="updatePinPanitiaAdmin()" class="w-full py-2.5 rounded-xl bg-cyan-600 text-white font-bold text-xs">Simpan PIN Baru</button>
                     </div>
                 </div>
             </div>
+        </main>
+    </div>
 
-            <!-- TAB PANITIA -->
-            <div id="view-panitia" class="space-y-6 hidden">
-                <div class="glass-card p-6 rounded-2xl shadow-xl">
-                    <h2 class="text-base font-bold text-white mb-4">Panel Kontrol Panitia (Input Skor)</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="panitiaMatchGrid"></div>
-                </div>
-            </div>
-
-            <!-- TAB ADMIN -->
-            <div id="view-admin" class="space-y-6 hidden">
-                <div class="glass-card p-6 rounded-2xl shadow-xl space-y-4 max-w-md">
-                    <h2 class="text-base font-bold text-white">Pengaturan Sistem Admin</h2>
-                    <div><label class="text-xs text-slate-300">Ubah PIN Panitia</label><input type="password" id="adminNewPin" class="w-full bg-[#0b0f19] border border-slate-700 rounded-xl px-4 py-2 text-sm text-white mt-1"></div>
-                    <button onclick="updatePinPanitia()" class="w-full py-2.5 rounded-xl bg-cyan-600 text-white font-bold text-xs">Simpan PIN Baru</button>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Modal Input Skor Panitia -->
-    <div id="modalPanitiaScore" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="glass-card p-6 rounded-2xl max-w-sm w-full space-y-4 border border-slate-700">
-            <h3 id="modalMatchTitle" class="text-sm font-bold text-white">Input Skor</h3>
+    <!-- Modal Input Skor -->
+    <div id="modalPanitiaScore" class="fixed inset-0 bg-[#0b0f19]/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="glass-card p-6 rounded-2xl max-w-md w-full border border-white/10 shadow-2xl space-y-6">
+            <h3 id="modalMatchTitle" class="text-sm font-bold text-white">Input Skor Pertandingan</h3>
             <input type="hidden" id="modalMatchId">
-            <div class="flex justify-between items-center bg-slate-900 p-3 rounded-xl"><span id="modalTeamA" class="text-xs font-bold">Tim A</span><input type="number" id="modalScoreA" value="0" class="w-16 bg-darkBg border border-slate-700 rounded-lg py-1 text-center font-bold"></div>
-            <div class="flex justify-between items-center bg-slate-900 p-3 rounded-xl"><span id="modalTeamB" class="text-xs font-bold">Tim B</span><input type="number" id="modalScoreB" value="0" class="w-16 bg-darkBg border border-slate-700 rounded-lg py-1 text-center font-bold"></div>
-            <div class="flex space-x-2 pt-2">
-                <button onclick="closePanitiaModal()" class="flex-1 py-2 rounded-xl bg-slate-800 text-xs">Batal</button>
-                <button onclick="submitPanitiaScore()" class="flex-1 py-2 rounded-xl bg-[#00ffaa] text-darkBg font-bold text-xs">Simpan</button>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl">
+                    <span id="modalTeamA" class="text-sm font-bold text-white w-1/3 truncate">Tim A</span>
+                    <input type="number" id="modalScoreA" min="0" value="0" class="w-16 bg-[#0b0f19] border border-white/10 rounded-xl py-2 text-center text-lg font-bold text-white">
+                </div>
+                <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl">
+                    <span id="modalTeamB" class="text-sm font-bold text-white w-1/3 truncate">Tim B</span>
+                    <input type="number" id="modalScoreB" min="0" value="0" class="w-16 bg-[#0b0f19] border border-white/10 rounded-xl py-2 text-center text-lg font-bold text-white">
+                </div>
+            </div>
+            <div class="flex space-x-3 pt-2">
+                <button onclick="closePanitiaModal()" class="flex-1 py-2.5 rounded-xl bg-white/5 text-gray-300 font-bold text-xs">Batal</button>
+                <button onclick="submitPanitiaScore()" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#00ffaa] to-emerald-500 text-[#0b0f19] font-bold text-xs">Simpan Skor</button>
             </div>
         </div>
     </div>
 
-    <!-- PIN Modal -->
-    <div id="pinModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="glass-card p-6 rounded-2xl max-w-xs w-full text-center space-y-3">
+    <!-- PIN Modal Panitia -->
+    <div id="pinModal" class="fixed inset-0 bg-[#0b0f19]/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="glass-card p-6 rounded-2xl max-w-xs w-full text-center space-y-4 border border-white/10">
             <h3 class="text-sm font-bold text-white">Masukkan PIN Panitia</h3>
-            <input type="password" id="inputPin" class="w-full bg-darkBg border border-slate-700 rounded-xl px-4 py-2 text-center font-mono text-white">
-            <button onclick="verifyPin()" class="w-full py-2 bg-cyan-600 rounded-xl font-bold text-xs text-white">Masuk</button>
+            <input type="password" id="inputPin" placeholder="••••" class="w-full bg-[#0b0f19] border border-white/10 rounded-xl px-4 py-2 text-center font-mono text-white">
+            <button onclick="verifyPin()" class="w-full py-2.5 rounded-xl bg-cyan-600 font-bold text-xs text-white">Masuk Panel</button>
         </div>
     </div>
 
     <script>
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyUywXk2hDlHKn19L7zXbaQMxf81yBZLAeAHVUgQXsdKCTCXVokNB0B7wBCsokjJ1iL5A/exec";
+        // GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA (/exec)
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzqkHOLl7LhIoePgbE8Q2Loei_bkNfDp4srjJ27lu-7krUMcmL-iSKBftYVuA6fB4XgAw/exec";
         let appData = { peserta: [], matches: [] };
 
         function showLoading(text) {
@@ -148,23 +252,24 @@
         }
 
         function switchTab(tabId) {
-            ['peserta', 'cetak', 'bagan', 'panitia', 'admin'].forEach(t => {
-                const el = document.getElementById('view-' + t);
+            ['peserta', 'cetak', 'bagan', 'panitia', 'admin'].forEach(function(t) {
+                var el = document.getElementById('view-' + t);
                 if (el) el.classList.add('hidden');
             });
-            const target = document.getElementById('view-' + tabId);
+            var target = document.getElementById('view-' + tabId);
             if (target) target.classList.remove('hidden');
         }
 
         async function loadAppData() {
             showLoading("design by masdonie");
             try {
-                const res = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action: 'getAppData' }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-                const json = await res.json();
+                var res = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action: 'getAppData' }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+                var json = await res.json();
                 if (json.status === 'success') {
                     appData.peserta = json.peserta || [];
                     appData.matches = json.jadwalSkor || [];
                     renderPesertaTable();
+                    renderCetakDropdown();
                     renderBracket();
                     renderPanitiaPanel();
                 }
@@ -176,89 +281,130 @@
         }
 
         function renderPesertaTable() {
-            const tbody = document.getElementById('pesertaTableBody');
-            if (!appData.peserta.length) { tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">Belum ada peserta.</td></tr>'; return; }
-            let html = '';
-            appData.peserta.forEach(p => {
-                html += `<tr class="border-b border-slate-800"><td class="p-3 font-mono text-[#00ffaa]">${p.ID_Pendaftaran}</td><td class="p-3 font-bold">${p.Nama_Pemain}</td><td class="p-3">${p.Nomor_HP}</td><td class="p-3">${p.Nama_Kecamatan}</td><td class="p-3"><span class="px-2 py-0.5 rounded bg-[#00ffaa]/10 text-[#00ffaa] text-[10px] font-bold">${p.Status_Pemain}</span></td></tr>`;
+            var tbody = document.getElementById('pesertaTableBody');
+            if (!appData.peserta.length) { tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">Belum ada peserta.</td></tr>'; return; }
+            var html = '';
+            appData.peserta.forEach(function(p) {
+                html += '<tr class="hover:bg-white/5"><td class="p-3 font-mono text-[#00ffaa]">' + p.ID_Pendaftaran + '</td><td class="p-3 font-bold text-white">' + p.Nama_Pemain + '</td><td class="p-3">' + p.Nomor_HP + '</td><td class="p-3">' + p.Nama_Kecamatan + '</td><td class="p-3"><span class="px-2.5 py-1 rounded-full bg-[#00ffaa]/10 text-[#00ffaa] font-bold text-[10px]">' + p.Status_Pemain + '</span></td></tr>';
             });
             tbody.innerHTML = html;
         }
 
         async function handleFormSubmit(e) {
             e.preventDefault();
-            showLoading("Menyimpan...");
+            showLoading("Menyimpan Skuad...");
             try {
-                const res = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action: 'daftarPeserta', data: { namaPemain: document.getElementById('namaPemain').value, nomorHp: document.getElementById('noHp').value, kecamatan: document.getElementById('kecamatan').value, unsur: 'Madrasah' } }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-                const json = await res.json();
+                var res = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action: 'daftarPeserta', payload: { namaPemain: document.getElementById('namaPemain').value, nomorHp: document.getElementById('noHp').value, kecamatan: document.getElementById('kecamatan').value, unsur: 'Madrasah' } }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+                var json = await res.json();
                 hideLoading();
                 if (json.status === 'success') {
                     document.getElementById('formPendaftaran').reset();
+                    document.getElementById('noHp').value = '08';
                     loadAppData();
                 }
             } catch (err) { hideLoading(); alert(err.message); }
         }
 
+        function renderCetakDropdown() {
+            var select = document.getElementById('selectPesertaCetak');
+            if (!select) return;
+            var html = '<option value="">-- Pilih Peserta --</option>';
+            appData.peserta.forEach(function(p) {
+                html += '<option value="' + p.ID_Pendaftaran + '">' + p.Nama_Pemain + ' (' + p.Nama_Kecamatan + ')</option>';
+            });
+            select.innerHTML = html;
+        }
+
+        function generateIdCardPreview() {
+            var idReg = document.getElementById('selectPesertaCetak').value;
+            var box = document.getElementById('idCardPreviewBox');
+            if (!idReg) { box.classList.add('hidden'); return; }
+            var p = appData.peserta.find(function(item) { return item.ID_Pendaftaran === idReg; });
+            if (!p) return;
+            document.getElementById('cardIdReg').innerText = p.ID_Pendaftaran;
+            document.getElementById('cardNama').innerText = p.Nama_Pemain;
+            document.getElementById('cardKec').innerText = p.Nama_Kecamatan;
+            box.classList.remove('hidden');
+        }
+
         function renderBracket() {
-            const container = document.getElementById('bracketTreeContainer');
-            if (!appData.matches.length) { container.innerHTML = '<p class="text-xs text-slate-500">Bagan belum siap.</p>'; return; }
-            let html = '';
-            appData.matches.forEach(m => {
-                let isRunning = m.Status_Match === 'Sedang Berjalan';
-                let cardClass = isRunning ? "glass-card p-3 rounded-xl border border-[#00ffaa] pulse-glow w-56" : "glass-card p-3 rounded-xl border border-slate-800 w-56";
-                html += `<div class="${cardClass}">
-                    <div class="text-[10px] font-bold text-slate-400 mb-2">${m.ID_Match} (${m.Babak})</div>
-                    <div class="flex justify-between items-center bg-white/5 px-2 py-1 rounded text-xs mb-1"><span class="truncate">${m.Tim_A}</span><span class="font-bold text-[#00ffaa]">${m.Skor_A}</span></div>
-                    <div class="flex justify-between items-center bg-white/5 px-2 py-1 rounded text-xs"><span class="truncate">${m.Tim_B}</span><span class="font-bold text-[#00ffaa]">${m.Skor_B}</span></div>
-                </div>`;
+            var container = document.getElementById('bracketTreeContainer');
+            if (!appData.matches.length) { container.innerHTML = '<p class="text-xs text-gray-500">Bagan belum siap.</p>'; return; }
+            var html = '';
+            appData.matches.forEach(function(m) {
+                var isRunning = m.Status === 'Sedang Berjalan';
+                var isDone = m.Status === 'Selesai';
+                var cardClass = isRunning ? "glass-card p-3 rounded-xl border border-[#00ffaa] pulse-glow w-56 flex-shrink-0" : "glass-card p-3 rounded-xl border border-white/10 w-56 flex-shrink-0";
+                
+                html += '<div class="' + cardClass + '">' +
+                    '<div class="flex items-center justify-between mb-2"><span class="text-[10px] font-bold text-gray-400">' + m.Match_ID + '</span>' +
+                    (isDone ? '<span class="text-[10px] text-emerald-400 font-bold">✓ Selesai</span>' : (isRunning ? '<span class="text-[10px] text-[#00ffaa] font-bold animate-pulse">● Berjalan</span>' : '<span class="text-[10px] text-gray-500">Menunggu</span>')) +
+                    '</div>' +
+                    '<div class="space-y-1">' +
+                        '<div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded-lg text-xs"><span class="truncate text-white font-medium">' + m.Tim_A + '</span><span class="font-bold text-[#00ffaa]">' + m.Skor_A + '</span></div>' +
+                        '<div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded-lg text-xs"><span class="truncate text-white font-medium">' + m.Tim_B + '</span><span class="font-bold text-[#00ffaa]">' + m.Skor_B + '</span></div>' +
+                    '</div>' +
+                '</div>';
             });
             container.innerHTML = html;
             checkPodium();
         }
 
         function checkPodium() {
-            const mFinal = appData.matches.find(m => m.ID_Match === 'MATCH-015');
-            if (mFinal && mFinal.Status_Match === 'Selesai') {
-                document.getElementById('podiumContainer').classList.remove('hidden');
-                let j1 = mFinal.Skor_A > mFinal.Skor_B ? mFinal.Tim_A : mFinal.Tim_B;
-                let j2 = mFinal.Skor_A > mFinal.Skor_B ? mFinal.Tim_B : mFinal.Tim_A;
-                document.getElementById('podiumCards').innerHTML = `<div class="glass-card p-3 rounded-xl text-center"><div class="text-xl">🥇</div><p class="text-xs font-bold text-amber-400 mt-1">${j1}</p></div><div class="glass-card p-3 rounded-xl text-center"><div class="text-xl">🥈</div><p class="text-xs font-bold text-slate-200 mt-1">${j2}</p></div><div class="glass-card p-3 rounded-xl text-center"><div class="text-xl">🥉</div><p class="text-xs font-bold text-amber-600 mt-1">Tim Kontingen 3</p></div>`;
+            var container = document.getElementById('podiumContainer');
+            var cards = document.getElementById('podiumCards');
+            var mFinal = appData.matches.find(function(m) { return m.Match_ID === 'Match 15'; });
+            if (mFinal && mFinal.Status === 'Selesai') {
+                container.classList.remove('hidden');
+                var juara1 = mFinal.Skor_A > mFinal.Skor_B ? mFinal.Tim_A : mFinal.Tim_B;
+                var juara2 = mFinal.Skor_A > mFinal.Skor_B ? mFinal.Tim_B : mFinal.Tim_A;
+                cards.innerHTML = '<div class="glass-card p-4 rounded-xl border border-amber-500/30 text-center space-y-2 bg-amber-500/5"><div class="text-2xl">🥇</div><h4 class="text-xs font-bold text-gray-400 uppercase">Juara 1</h4><p class="text-sm font-bold text-amber-400">' + juara1 + '</p></div>' +
+                '<div class="glass-card p-4 rounded-xl border border-gray-400/30 text-center space-y-2 bg-gray-400/5"><div class="text-2xl">🥈</div><h4 class="text-xs font-bold text-gray-400 uppercase">Juara 2</h4><p class="text-sm font-bold text-gray-200">' + juara2 + '</p></div>' +
+                '<div class="glass-card p-4 rounded-xl border border-amber-700/30 text-center space-y-2 bg-amber-700/5"><div class="text-2xl">🥉</div><h4 class="text-xs font-bold text-gray-400 uppercase">Juara 3</h4><p class="text-sm font-bold text-amber-600">Tim Kontingen 3</p></div>';
             }
         }
 
         function renderPanitiaPanel() {
-            const grid = document.getElementById('panitiaMatchGrid');
+            var grid = document.getElementById('panitiaMatchGrid');
             if (!grid) return;
-            let html = '';
-            appData.matches.forEach(m => {
-                let isRunning = m.Status_Match === 'Sedang Berjalan';
-                let cardClass = isRunning ? "glass-card p-4 rounded-xl border border-[#00ffaa] pulse-glow cursor-pointer" : "glass-card p-4 rounded-xl border border-slate-800 opacity-60";
-                let clickAttr = isRunning ? `onclick="openPanitiaModal('${m.ID_Match}')"` : '';
-                html += `<div ${clickAttr} class="${cardClass}">
-                    <div class="text-xs font-bold text-[#00ffaa] mb-2">${m.ID_Match}</div>
-                    <div class="text-xs text-white">${m.Tim_A} vs ${m.Tim_B}</div>
-                    <div class="text-[10px] text-slate-400 mt-2">Status: ${m.Status_Match}</div>
-                </div>`;
+            var html = '';
+            appData.matches.forEach(function(m) {
+                var isRunning = m.Status === 'Sedang Berjalan';
+                var isDone = m.Status === 'Selesai';
+                var cardClass = isRunning ? "glass-card p-4 rounded-xl border border-[#00ffaa] pulse-glow relative cursor-pointer hover:bg-white/5 transition-all" : "glass-card p-4 rounded-xl border border-white/10 opacity-70 relative";
+                var clickAttr = isRunning ? 'onclick="openPanitiaModal(\'' + m.Match_ID + '\')"' : '';
+                
+                html += '<div ' + clickAttr + ' class="' + cardClass + '">' +
+                    '<div class="flex items-center justify-between mb-3"><span class="text-xs font-bold text-[#00ffaa]">' + m.Match_ID + ' (' + m.Babak + ')</span>' +
+                    (isDone ? '<span class="text-[10px] text-emerald-400 font-bold">✓ Selesai</span>' : (isRunning ? '<span class="text-[10px] text-[#00ffaa] font-bold animate-pulse">● Berjalan</span>' : '<span class="text-[10px] text-gray-500">Menunggu</span>')) +
+                    '</div>' +
+                    '<div class="space-y-2 text-xs">' +
+                        '<div class="flex justify-between items-center bg-white/5 px-3 py-2 rounded-lg"><span class="text-white font-medium">' + m.Tim_A + '</span><span class="font-bold text-[#00ffaa]">' + m.Skor_A + '</span></div>' +
+                        '<div class="flex justify-between items-center bg-white/5 px-3 py-2 rounded-lg"><span class="text-white font-medium">' + m.Tim_B + '</span><span class="font-bold text-[#00ffaa]">' + m.Skor_B + '</span></div>' +
+                    '</div>' +
+                '</div>';
             });
             grid.innerHTML = html;
         }
 
         function openPanitiaModal(matchId) {
-            const m = appData.matches.find(x => x.ID_Match === matchId);
+            var m = appData.matches.find(function(x) { return x.Match_ID === matchId; });
             if (!m) return;
-            document.getElementById('modalMatchId').value = m.ID_Match;
-            document.getElementById('modalMatchTitle').innerText = "Input Skor " + m.ID_Match;
+            document.getElementById('modalMatchId').value = m.Match_ID;
+            document.getElementById('modalMatchTitle').innerText = "Input Skor " + m.Match_ID + " (" + m.Babak + ")";
             document.getElementById('modalTeamA').innerText = m.Tim_A;
             document.getElementById('modalTeamB').innerText = m.Tim_B;
+            document.getElementById('modalScoreA').value = m.Skor_A;
+            document.getElementById('modalScoreB').value = m.Skor_B;
             document.getElementById('modalPanitiaScore').classList.remove('hidden');
         }
 
         function closePanitiaModal() { document.getElementById('modalPanitiaScore').classList.add('hidden'); }
 
         async function submitPanitiaScore() {
-            showLoading("Menyimpan...");
+            showLoading("Menyimpan Skor...");
             try {
-                await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateSkorMatch', data: { idMatch: document.getElementById('modalMatchId').value, skorA: document.getElementById('modalScoreA').value, skorB: document.getElementById('modalScoreB').value } }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+                await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateSkor', matchId: document.getElementById('modalMatchId').value, skorA: parseInt(document.getElementById('modalScoreA').value) || 0, skorB: parseInt(document.getElementById('modalScoreB').value) || 0 }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
                 hideLoading();
                 closePanitiaModal();
                 loadAppData();
@@ -267,17 +413,17 @@
 
         function requestPanitiaAccess() { document.getElementById('pinModal').classList.remove('hidden'); }
         async function verifyPin() {
-            const pin = document.getElementById('inputPin').value;
-            const res = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action: 'verifikasiPinPanitia', data: pin }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-            const json = await res.json();
+            var pin = document.getElementById('inputPin').value;
+            var res = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action: 'verifikasiPinPanitia', data: pin }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+            var json = await res.json();
             if (json.status === 'success') { document.getElementById('pinModal').classList.add('hidden'); switchTab('panitia'); } else { alert(json.message); }
         }
 
         function requestAdminAccess() { switchTab('admin'); }
-        async function updatePinPanitia() {
-            const newPin = document.getElementById('adminNewPin').value;
-            await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action: 'updatePengaturan', data: { kunci: 'PIN_Panel_Panitia', nilai: newPin } }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-            alert("PIN berhasil diperbarui!");
+        async function updatePinPanitiaAdmin() {
+            var newPin = document.getElementById('adminNewPin').value;
+            await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action: 'updatePinPanitia', pin: newPin }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+            alert("PIN Panitia berhasil diperbarui!");
         }
 
         window.onload = function() {

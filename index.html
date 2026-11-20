@@ -77,6 +77,8 @@
             }
             .print-active, .print-active * {
                 visibility: visible;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
             .print-active {
                 position: absolute;
@@ -86,6 +88,18 @@
                 background: white !important;
                 color: black !important;
                 display: block !important;
+            }
+            #idCardPreviewBox.print-active {
+                position: fixed !important;
+                left: 50% !important;
+                top: 24px !important;
+                transform: translateX(-50%) !important;
+                width: 360px !important;
+                max-width: 100% !important;
+                background: linear-gradient(to bottom right, #0f172a, #064e3b) !important;
+                color: #ffffff !important;
+                display: block !important;
+                z-index: 99999 !important;
             }
         }
     </style>
@@ -382,7 +396,7 @@
                     </div>
 
                     <div class="mt-4 text-center">
-                        <button onclick="window.print()" class="w-full sm:w-auto px-6 py-2.5 bg-neonGreen hover:bg-neonHover text-darkBg font-bold rounded-xl text-xs transition shadow-lg shadow-neonGreen/20 touch-manipulation">
+                        <button type="button" onclick="cetakKartuPeserta()" class="w-full sm:w-auto px-6 py-2.5 bg-neonGreen hover:bg-neonHover text-darkBg font-bold rounded-xl text-xs transition shadow-lg shadow-neonGreen/20 touch-manipulation">
                             <i class="fa-solid fa-print mr-2"></i>Cetak Kartu Sekarang
                         </button>
                     </div>
@@ -922,7 +936,6 @@
             }
         }
 
-        // Helper: Parsing format timestamp dd/MM/yyyy HH:mm:ss menjadi milidetik
         function parseTimestampMs(ts) {
             if (!ts) return Number.MAX_SAFE_INTEGER;
             const str = ts.toString().trim();
@@ -943,7 +956,6 @@
             return isNaN(parsed) ? Number.MAX_SAFE_INTEGER : parsed;
         }
 
-        // Helper: Hitung urutan pendaftaran per Unsur dalam 1 Kecamatan yang sama
         function buildUrutanPerUnsurKecamatanMap(allPeserta) {
             const groups = {};
             (allPeserta || []).forEach(p => {
@@ -968,7 +980,6 @@
             return urutanMap;
         }
 
-        // Helper: Format Nomor WhatsApp yang langsung bisa diklik
         function buildWhatsAppHtml(rawNomor, extraClasses = 'text-cyan-400 hover:text-neonGreen') {
             const rawStr = rawNomor ? rawNomor.toString().replace(/^'/, '').trim() : '';
             const digits = rawStr.replace(/[^0-9]/g, '');
@@ -1195,10 +1206,8 @@
 
             if (!tbody) return;
 
-            // Hitung urutan per unsur dalam 1 kecamatan dari seluruh data peserta
             const urutanMap = buildUrutanPerUnsurKecamatanMap(globalAppData.peserta || []);
 
-            // Urutkan tampilan berdasarkan Kecamatan -> Unsur -> Urutan Pendaftaran (Waktu Tercepat)
             let sortedData = [...dataList].sort((a, b) => {
                 const kecCmp = (a.Nama_Kecamatan || '').localeCompare(b.Nama_Kecamatan || '');
                 if (kecCmp !== 0) return kecCmp;
@@ -1437,6 +1446,33 @@
             qrContainer.innerHTML = '';
             new QRCode(qrContainer, { text: `VERIFIED-HAB-MURA|${p.ID_Pendaftaran}|${p.Nama_Pemain}|${p.Nama_Kecamatan}|${p.Timestamp}`, width: 68, height: 68, colorDark: "#0b0f19", colorLight: "#ffffff" });
             previewBox.classList.remove('hidden');
+        }
+
+        function cetakKartuPeserta() {
+            const select = document.getElementById('selectPesertaCetak');
+            const previewBox = document.getElementById('idCardPreviewBox');
+
+            if (!select || !select.value) {
+                showErrorModal('Pilih Peserta', 'Silakan pilih nama peserta terlebih dahulu sebelum mencetak kartu.');
+                return;
+            }
+
+            generateIdCardPreview();
+
+            if (!previewBox || previewBox.classList.contains('hidden')) {
+                showErrorModal('Data Kartu Kosong', 'Pratinjau kartu peserta belum tersedia.');
+                return;
+            }
+
+            document.getElementById('printReportArea').classList.remove('print-active');
+            document.getElementById('printReportHasilArea').classList.remove('print-active');
+            previewBox.classList.add('print-active');
+
+            window.print();
+
+            setTimeout(() => {
+                previewBox.classList.remove('print-active');
+            }, 800);
         }
 
         function renderReportPreviewTables() {
@@ -1724,6 +1760,7 @@
         }
 
         function cetakLaporanPeserta() {
+            document.getElementById('idCardPreviewBox').classList.remove('print-active');
             document.getElementById('printReportArea').classList.add('print-active');
             document.getElementById('printReportArea').classList.remove('hidden');
             document.getElementById('printReportHasilArea').classList.remove('print-active');
@@ -1800,6 +1837,7 @@
                 `;
             }
 
+            document.getElementById('idCardPreviewBox').classList.remove('print-active');
             document.getElementById('printReportHasilArea').classList.add('print-active');
             document.getElementById('printReportHasilArea').classList.remove('hidden');
             document.getElementById('printReportArea').classList.remove('print-active');

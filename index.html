@@ -195,7 +195,7 @@
                             </div>
                         </div>
 
-                        <form id="formPendaftaran" onsubmit="handlePendaftaran(event)" class="space-y-3.5">
+                        <form id="formPendaftaran" onsubmit="event.preventDefault(); handlePendaftaran(event);" class="space-y-3.5">
                             <div>
                                 <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Unsur Pendaftar</label>
                                 <select id="regUnsur" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-neonGreen transition text-slate-200" required onchange="onUnsurChange()">
@@ -319,6 +319,9 @@
 
             <!-- VIEW PERTANDINGAN & BAGAN -->
             <section id="view-pertandingan" class="tab-content space-y-6 hidden">
+                <!-- PODIUM JUARA BESAR (OTOMATIS MUNCUL SETELAH GRAND FINAL SELESAI) -->
+                <div id="podiumJuaraContainer" class="hidden"></div>
+
                 <div id="bracketContainerMain" class="glass-panel p-4 sm:p-6 rounded-2xl shadow-xl space-y-4 w-full max-w-full">
                     <div class="flex items-center space-x-3 border-b border-slate-800 pb-3">
                         <div class="p-2.5 rounded-xl bg-neonGreen/10 text-neonGreen flex-shrink-0">
@@ -326,7 +329,7 @@
                         </div>
                         <div>
                             <h2 class="font-bold text-sm sm:text-base text-white">Bagan Pertandingan</h2>
-                            <p class="text-[11px] text-neonGreen font-semibold">Live Bracket Musi Rawas</p>
+                            <p class="text-[11px] text-neonGreen font-semibold">Live Bracket Musi Rawas (16 Besar - Perebutan Juara 3 - Grand Final)</p>
                         </div>
                     </div>
 
@@ -589,6 +592,18 @@
                                 <i class="fa-solid fa-lock mr-2"></i>Perbarui PIN Pengaturan Admin
                             </button>
                         </div>
+
+                        <div class="pt-4 border-t border-rose-500/30 space-y-2.5">
+                            <div>
+                                <h3 class="font-bold text-xs sm:text-sm text-rose-400 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-rotate-left"></i>Manajemen Bagan Pertandingan
+                                </h3>
+                                <p class="text-[10px] text-slate-400 leading-relaxed">Kembalikan seluruh susunan bagan 16 Besar hingga Grand Final ke posisi awal (seluruh skor direset ke 0).</p>
+                            </div>
+                            <button type="button" onclick="openResetBaganModal()" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-rose-600/20 flex items-center justify-center touch-manipulation">
+                                <i class="fa-solid fa-trash-arrow-up mr-2"></i>Reset Bagan ke Posisi Awal
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -661,15 +676,29 @@
             <div class="space-y-3 pt-1">
                 <div>
                     <label id="labelTeamA" class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Tim A</label>
-                    <input type="number" id="inputSkorA" min="0" onfocus="this.value=''" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white font-bold focus:outline-none focus:border-neonGreen" value="0">
+                    <input type="number" id="inputSkorA" min="0" onfocus="this.select()" oninput="checkScoreTie()" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white font-bold focus:outline-none focus:border-neonGreen" value="0">
                 </div>
                 <div>
                     <label id="labelTeamB" class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Tim B</label>
-                    <input type="number" id="inputSkorB" min="0" onfocus="this.value=''" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white font-bold focus:outline-none focus:border-neonGreen" value="0">
+                    <input type="number" id="inputSkorB" min="0" onfocus="this.select()" oninput="checkScoreTie()" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white font-bold focus:outline-none focus:border-neonGreen" value="0">
                 </div>
+
+                <!-- OPSI PEMENANG ADU PENALTI SAAT SKOR SERI -->
+                <div id="penaltyWinnerBox" class="hidden p-3 rounded-xl bg-amber-500/10 border border-amber-400/50 space-y-2">
+                    <p class="text-[11px] font-bold text-amber-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-futbol"></i>Skor Seri! Pilih Pemenang Adu Penalti:
+                    </p>
+                    <select id="selectPenaltyWinner" onchange="hideScoreInlineError()" class="w-full bg-darkBg/90 border border-amber-400/50 rounded-xl px-3 py-2 text-xs text-white font-semibold focus:outline-none focus:border-neonGreen">
+                        <option value="">-- Pilih Pemenang Adu Penalti --</option>
+                    </select>
+                </div>
+
+                <div id="scoreErrorInline" class="hidden text-[11px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/40 rounded-xl px-3 py-2"></div>
             </div>
 
             <input type="hidden" id="activeMatchId">
+            <input type="hidden" id="activeTeamAName">
+            <input type="hidden" id="activeTeamBName">
 
             <div class="flex gap-2.5 pt-3 border-t border-slate-800">
                 <button onclick="closeScoreModal()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition touch-manipulation">
@@ -677,6 +706,27 @@
                 </button>
                 <button onclick="submitPanitiaScore()" class="flex-1 py-2.5 bg-neonGreen hover:bg-neonHover text-darkBg font-bold rounded-xl text-xs transition shadow-lg shadow-neonGreen/20 touch-manipulation">
                     Simpan Skor
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL KONFIRMASI RESET BAGAN (ADMIN) -->
+    <div id="resetBaganModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="glass-panel border-2 border-rose-500/60 rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center space-y-4 relative overflow-hidden">
+            <div class="w-16 h-16 bg-rose-500/20 text-rose-400 rounded-2xl flex items-center justify-center text-3xl mx-auto shadow-lg border border-rose-500/40">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="space-y-1.5">
+                <h3 class="font-black text-base sm:text-lg text-white tracking-wide">KONFIRMASI RESET BAGAN</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">Seluruh hasil skor, pemenang, dan susunan undian dari 16 Besar hingga Grand Final akan dikembalikan ke posisi awal. Lanjutkan?</p>
+            </div>
+            <div class="flex gap-2.5 pt-2">
+                <button type="button" onclick="closeResetBaganModal()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition touch-manipulation">
+                    Batal
+                </button>
+                <button type="button" onclick="confirmResetBagan()" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-rose-600/20 touch-manipulation">
+                    Ya, Reset Bagan
                 </button>
             </div>
         </div>
@@ -705,7 +755,7 @@
         // SETTING API GOOGLE APPS SCRIPT (WEB APP URL)
         // SILAKAN GANTI URL DI BAWAH INI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA
         // =========================================================================
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzPtVW8ScgTpjG0dvhTd7og3I5ZGC1s8_RdxgjLM65iYVv1e40GypZTTs5pD9ylvP2qJQ/exec";
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwdBPFYP_8C7hAloNUJqLKtpiNxi6YkK20Khgxkdw2sahObDaT-gNOflvpLrBZby_YXfQ/exec";
         // =========================================================================
 
         let globalAppData = {
@@ -725,7 +775,15 @@
             "Kec. Tiang Pumpung Kepungut", "Kec. Tuah Negeri"
         ];
 
+        // Wrapper API yang kompatibel untuk GAS Web App URL maupun mode Safe Preview
         async function fetchAPI(action, dataPayload = null) {
+            if (typeof google !== 'undefined' && google.script && google.script.run) {
+                return new Promise(function(resolve, reject) {
+                    google.script.run
+                        .withSuccessHandler(resolve)
+                        .withFailureHandler(reject)[action](dataPayload);
+                });
+            }
             if (GAS_API_URL === "MASUKKAN_URL_APPS_SCRIPT_ANDA_DISINI") {
                 throw new Error("Tolong ganti variabel GAS_API_URL dengan URL Apps Script Web App Anda terlebih dahulu.");
             }
@@ -751,7 +809,7 @@
 
         function populateKecamatanDropdowns() {
             let optionsHtml = '';
-            daftarKecamatanMusiRawas.forEach(k => {
+            daftarKecamatanMusiRawas.forEach(function(k) {
                 optionsHtml += '<option value="' + k + '">' + k + '</option>';
             });
             const regKec = document.getElementById('regKecamatan');
@@ -819,7 +877,7 @@
         function requestPanitiaAccess() {
             document.getElementById('inputPanitiaPin').value = '';
             document.getElementById('pinModal').classList.remove('hidden');
-            setTimeout(() => { document.getElementById('inputPanitiaPin').focus(); }, 100);
+            setTimeout(function() { document.getElementById('inputPanitiaPin').focus(); }, 100);
         }
 
         function closePinModal() {
@@ -848,7 +906,7 @@
         function requestAdminAccess() {
             document.getElementById('inputAdminPin').value = '';
             document.getElementById('pinAdminModal').classList.remove('hidden');
-            setTimeout(() => { document.getElementById('inputAdminPin').focus(); }, 100);
+            setTimeout(function() { document.getElementById('inputAdminPin').focus(); }, 100);
         }
 
         function closeAdminPinModal() {
@@ -875,8 +933,8 @@
         }
 
         function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.nav-btn').forEach(btn => {
+            document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.add('hidden'); });
+            document.querySelectorAll('.nav-btn').forEach(function(btn) {
                 btn.className = 'nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-medium transition-all duration-200 text-slate-300 hover:text-white hover:bg-white/5 border border-transparent touch-manipulation';
             });
 
@@ -895,6 +953,7 @@
                 renderDynamicBracket('panitiaBracketView', true);
             }
             if (tabId === 'pertandingan') {
+                renderPodiumJuara();
                 renderDynamicBracket('dynamicMainBracketView', false);
             }
             if (tabId === 'pendaftaran') {
@@ -958,7 +1017,7 @@
 
         function buildUrutanPerUnsurKecamatanMap(allPeserta) {
             const groups = {};
-            (allPeserta || []).forEach(p => {
+            (allPeserta || []).forEach(function(p) {
                 const kec = (p.Nama_Kecamatan || '-').toString().trim();
                 const unsur = (p.Unsur || p.Satker || '-').toString().trim();
                 const key = kec + '||' + unsur;
@@ -967,20 +1026,21 @@
             });
 
             const urutanMap = {};
-            Object.keys(groups).forEach(key => {
-                groups[key].sort((a, b) => {
+            Object.keys(groups).forEach(function(key) {
+                groups[key].sort(function(a, b) {
                     const diff = parseTimestampMs(a.Timestamp) - parseTimestampMs(b.Timestamp);
                     if (diff !== 0) return diff;
                     return (a.ID_Pendaftaran || '').localeCompare(b.ID_Pendaftaran || '');
                 });
-                groups[key].forEach((p, idx) => {
+                groups[key].forEach(function(p, idx) {
                     urutanMap[p.ID_Pendaftaran] = idx + 1;
                 });
             });
             return urutanMap;
         }
 
-        function buildWhatsAppHtml(rawNomor, extraClasses = 'text-cyan-400 hover:text-neonGreen') {
+        function buildWhatsAppHtml(rawNomor, extraClasses) {
+            const cls = extraClasses || 'text-cyan-400 hover:text-neonGreen';
             const rawStr = rawNomor ? rawNomor.toString().replace(/^'/, '').trim() : '';
             const digits = rawStr.replace(/[^0-9]/g, '');
             if (digits.length < 8) {
@@ -991,7 +1051,7 @@
             else if (digits.startsWith('8')) displayHp = '0' + digits;
 
             const waNum = displayHp.startsWith('0') ? '62' + displayHp.substring(1) : displayHp;
-            return `<a href="https://wa.me/${waNum}" target="_blank" rel="noopener noreferrer" class="${extraClasses} hover:underline inline-flex items-center gap-1.5 font-mono transition-colors" title="Chat WhatsApp ${displayHp}"><i class="fa-brands fa-whatsapp text-base text-emerald-400"></i><span>${displayHp}</span></a>`;
+            return '<a href="https://wa.me/' + waNum + '" target="_blank" rel="noopener noreferrer" class="' + cls + ' hover:underline inline-flex items-center gap-1.5 font-mono transition-colors" title="Chat WhatsApp ' + displayHp + '"><i class="fa-brands fa-whatsapp text-base text-emerald-400"></i><span>' + displayHp + '</span></a>';
         }
 
         function getCleanPhoneDisplay(rawNomor) {
@@ -1004,6 +1064,13 @@
         }
 
         async function loadAllData() {
+            // Mode Safe Preview (Canvas) jika URL belum dikonfigurasi dan bukan di lingkungan Apps Script
+            if (typeof google === 'undefined' && GAS_API_URL === "MASUKKAN_URL_APPS_SCRIPT_ANDA_DISINI") {
+                globalAppData.jadwalSkor = getDefaultJadwalSkor();
+                renderAllViews();
+                return;
+            }
+
             showLoading("Design by Masdonie");
             try {
                 const res = await fetchAPI('getAppData');
@@ -1017,6 +1084,7 @@
                 }
             } catch (error) {
                 hideLoading();
+                renderAllViews();
                 showErrorModal('Gagal Memuat', error.message + '. Apakah URL API Apps Script sudah benar?');
             }
         }
@@ -1031,13 +1099,14 @@
                 { ID_Match: 'MATCH-006', Babak: '16 Besar', Tim_A: 'Kec. STL Ulu Terawas', Tim_B: 'Kec. Sukakarya', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
                 { ID_Match: 'MATCH-007', Babak: '16 Besar', Tim_A: 'Kec. Tiang Pumpung Kepungut', Tim_B: 'Kec. Tuah Negeri', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
                 { ID_Match: 'MATCH-008', Babak: '16 Besar', Tim_A: 'Kemenag Internal', Tim_B: 'Kemenhaj Musi Rawas', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
-                { ID_Match: 'MATCH-009', Babak: 'Perempat Final', Tim_A: 'Pemenang 1', Tim_B: 'Pemenang 2', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
-                { ID_Match: 'MATCH-010', Babak: 'Perempat Final', Tim_A: 'Pemenang 3', Tim_B: 'Pemenang 4', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
-                { ID_Match: 'MATCH-011', Babak: 'Perempat Final', Tim_A: 'Pemenang 5', Tim_B: 'Pemenang 6', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
-                { ID_Match: 'MATCH-012', Babak: 'Perempat Final', Tim_A: 'Pemenang 7', Tim_B: 'Pemenang 8', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
-                { ID_Match: 'MATCH-013', Babak: 'Semifinal', Tim_A: 'Pemenang 9', Tim_B: 'Pemenang 10', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
-                { ID_Match: 'MATCH-014', Babak: 'Semifinal', Tim_A: 'Pemenang 11', Tim_B: 'Pemenang 12', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
-                { ID_Match: 'MATCH-015', Babak: 'Grand Final', Tim_A: 'Pemenang 13', Tim_B: 'Pemenang 14', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' }
+                { ID_Match: 'MATCH-009', Babak: 'Perempat Final', Tim_A: 'Pemenang 1', Tim_B: 'Pemenang 3', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
+                { ID_Match: 'MATCH-010', Babak: 'Perempat Final', Tim_A: 'Pemenang 2', Tim_B: 'Pemenang 4', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
+                { ID_Match: 'MATCH-011', Babak: 'Perempat Final', Tim_A: 'Pemenang 5', Tim_B: 'Pemenang 7', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
+                { ID_Match: 'MATCH-012', Babak: 'Perempat Final', Tim_A: 'Pemenang 6', Tim_B: 'Pemenang 8', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
+                { ID_Match: 'MATCH-013', Babak: 'Semifinal', Tim_A: 'Pemenang 9', Tim_B: 'Pemenang 11', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
+                { ID_Match: 'MATCH-014', Babak: 'Semifinal', Tim_A: 'Pemenang 10', Tim_B: 'Pemenang 12', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
+                { ID_Match: 'MATCH-015', Babak: 'Perebutan Juara 3', Tim_A: 'Kalah 13', Tim_B: 'Kalah 14', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
+                { ID_Match: 'MATCH-016', Babak: 'Grand Final', Tim_A: 'Pemenang 13', Tim_B: 'Pemenang 14', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' }
             ];
         }
 
@@ -1093,7 +1162,7 @@
                 window.initialTabSet = true;
             }
 
-            let m1 = (globalAppData.jadwalSkor || []).find(m => m.ID_Match === 'MATCH-001');
+            let m1 = (globalAppData.jadwalSkor || []).find(function(m) { return m.ID_Match === 'MATCH-001'; });
             const btnUndiPanitia = document.getElementById('btnUndianPanitia');
             if (m1 && m1.Status_Match === 'Selesai') {
                 if (btnUndiPanitia) {
@@ -1116,6 +1185,7 @@
             renderSquadList();
             populateCetakKartuDropdown();
             renderReportPreviewTables();
+            renderPodiumJuara();
             renderDynamicBracket('dynamicMainBracketView', false);
             renderDynamicBracket('panitiaBracketView', true);
         }
@@ -1132,7 +1202,7 @@
             let totalUnsurKec = 0;
 
             if (globalAppData.peserta) {
-                globalAppData.peserta.forEach(p => {
+                globalAppData.peserta.forEach(function(p) {
                     if (p.Nama_Kecamatan === kecamatan) {
                         totalKec++;
                         if (p.Unsur === unsur) totalUnsurKec++;
@@ -1140,11 +1210,11 @@
                 });
             }
             
-            let htmlInfo = `Total Pendaftar (${kecamatan}): <span class="text-white font-bold">${totalKec}/8 orang (Maksimal)</span><br>`;
+            let htmlInfo = 'Total Pendaftar (' + kecamatan + '): <span class="text-white font-bold">' + totalKec + '/8 orang (Maksimal)</span><br>';
             
             if (totalKec >= 8) {
-                htmlInfo += `Urutan Pendaftaran: <span class="text-rose-500 font-bold">Penuh</span>`;
-                htmlInfo += `<span class="text-rose-400 font-bold mt-1 block">Batas maksimal pendaftar (8 orang) telah tercapai untuk kontingen ini.</span>`;
+                htmlInfo += 'Urutan Pendaftaran: <span class="text-rose-500 font-bold">Penuh</span>';
+                htmlInfo += '<span class="text-rose-400 font-bold mt-1 block">Batas maksimal pendaftar (8 orang) telah tercapai untuk kontingen ini.</span>';
                 btnSubmit.disabled = true;
                 btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
                 btnSubmit.classList.remove('hover:bg-neonHover');
@@ -1154,34 +1224,34 @@
                 btnSubmit.classList.add('hover:bg-neonHover');
 
                 let nextUrutan = totalUnsurKec + 1;
-                htmlInfo += `Urutan Pendaftaran Unsur (${unsur}): <span class="text-neonGreen font-bold">Urutan ke-${nextUrutan}</span> di ${kecamatan}`;
+                htmlInfo += 'Urutan Pendaftaran Unsur (' + unsur + '): <span class="text-neonGreen font-bold">Urutan ke-' + nextUrutan + '</span> di ' + kecamatan;
             }
             
             document.getElementById('quotaDetailText').innerHTML = htmlInfo;
         }
 
         async function handlePendaftaran(e) {
-            e.preventDefault();
-            let kecamatan = document.getElementById('regKecamatan').value;
-            const unsur = document.getElementById('regUnsur').value;
+            if (e) e.preventDefault();
+            let kecamatan = String(document.getElementById('regKecamatan').value);
+            const unsur = String(document.getElementById('regUnsur').value);
             
             if (unsur === "Kemenag Internal") kecamatan = "Kemenag Internal";
             if (unsur === "Kemenhaj Musi Rawas") kecamatan = "Kemenhaj Musi Rawas";
 
-            const namaLembaga = document.getElementById('regNamaLembaga').value.trim();
-            const namaPemain = document.getElementById('regNama').value.toUpperCase();
-            let rawHp = document.getElementById('regHp').value;
+            const namaLembaga = String(document.getElementById('regNamaLembaga').value).trim();
+            const namaPemain = String(document.getElementById('regNama').value).toUpperCase();
+            let rawHp = String(document.getElementById('regHp').value);
             
             if (rawHp.length < 10 || rawHp.length > 13) return showErrorModal('Peringatan Validasi', 'Nomor HP tidak valid. Minimal 10 digit dan maksimal 13 digit.');
 
             showLoading("Menyimpan...");
             try {
-                const payload = { kecamatan, unsur, namaLembaga, namaPemain, nomorHp: rawHp };
+                const payload = { kecamatan: kecamatan, unsur: unsur, namaLembaga: namaLembaga, namaPemain: namaPemain, nomorHp: rawHp };
                 const res = await fetchAPI('daftarPeserta', payload);
                 hideLoading();
                 
                 if (res.status === 'success') {
-                    showErrorModal('Berhasil Mendaftar', `Peserta ${namaPemain} telah didaftarkan (${res.statusPemain}).`, true);
+                    showErrorModal('Berhasil Mendaftar', 'Peserta ' + namaPemain + ' telah didaftarkan (' + res.statusPemain + ').', true);
                     document.getElementById('formPendaftaran').reset();
                     document.getElementById('regHp').value = '08';
                     onUnsurChange();
@@ -1208,7 +1278,7 @@
 
             const urutanMap = buildUrutanPerUnsurKecamatanMap(globalAppData.peserta || []);
 
-            let sortedData = [...dataList].sort((a, b) => {
+            let sortedData = dataList.slice().sort(function(a, b) {
                 const kecCmp = (a.Nama_Kecamatan || '').localeCompare(b.Nama_Kecamatan || '');
                 if (kecCmp !== 0) return kecCmp;
                 const unsurCmp = (a.Unsur || '').localeCompare(b.Unsur || '');
@@ -1237,7 +1307,7 @@
             const pageData = filteredPesertaCache.slice(startIdx, endIdx);
 
             let html = '';
-            pageData.forEach(p => {
+            pageData.forEach(function(p) {
                 const unsur = p.Unsur || p.Satker || '-';
                 const lembaga = (p.Nama_Lembaga || '').trim();
                 const kecamatan = (p.Nama_Kecamatan || '-').trim();
@@ -1251,27 +1321,27 @@
 
                 const waHtml = buildWhatsAppHtml(p.Nomor_HP);
 
-                let unsurLembagaHtml = `<span class="px-2 py-0.5 rounded text-[10px] font-bold border bg-slate-800 text-slate-200 border-slate-700">${unsur}</span>`;
+                let unsurLembagaHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-bold border bg-slate-800 text-slate-200 border-slate-700">' + unsur + '</span>';
                 if (lembaga) {
-                    unsurLembagaHtml += `<div class="text-[10px] text-slate-300 mt-1 font-medium">${lembaga}</div>`;
+                    unsurLembagaHtml += '<div class="text-[10px] text-slate-300 mt-1 font-medium">' + lembaga + '</div>';
                 }
                 if (kecamatan && kecamatan !== unsur) {
-                    unsurLembagaHtml += `<div class="text-[10px] text-cyan-400/90 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>${kecamatan}</div>`;
+                    unsurLembagaHtml += '<div class="text-[10px] text-cyan-400/90 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>' + kecamatan + '</div>';
                 }
 
-                const urutanLabel = isCadangan ? `Urutan ke-${urutanKe} (Cadangan)` : `Urutan ke-${urutanKe}`;
+                const urutanLabel = isCadangan ? ('Urutan ke-' + urutanKe + ' (Cadangan)') : ('Urutan ke-' + urutanKe);
 
-                html += `<tr class="hover:bg-white/5 transition border-b border-slate-800/40">
-                    <td class="p-2.5 sm:p-3 font-mono font-semibold text-cyan-400 text-[11px] whitespace-nowrap">${p.ID_Pendaftaran || '-'}</td>
-                    <td class="p-2.5 sm:p-3 text-slate-100 font-bold">${p.Nama_Pemain || '-'}</td>
-                    <td class="p-2.5 sm:p-3 text-[11px] whitespace-nowrap">${waHtml}</td>
-                    <td class="p-2.5 sm:p-3">${unsurLembagaHtml}</td>
-                    <td class="p-2.5 sm:p-3 text-center whitespace-nowrap">
-                        <span class="px-2.5 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider inline-block ${badgeClass}">${urutanLabel}</span>
-                        <div class="text-[9px] text-slate-400 mt-1">${unsur} • ${kecamatan}</div>
-                    </td>
-                    <td class="p-2.5 sm:p-3 font-mono text-[11px] text-slate-300 whitespace-nowrap">${p.Timestamp || '-'}</td>
-                </tr>`;
+                html += '<tr class="hover:bg-white/5 transition border-b border-slate-800/40">' +
+                    '<td class="p-2.5 sm:p-3 font-mono font-semibold text-cyan-400 text-[11px] whitespace-nowrap">' + (p.ID_Pendaftaran || '-') + '</td>' +
+                    '<td class="p-2.5 sm:p-3 text-slate-100 font-bold">' + (p.Nama_Pemain || '-') + '</td>' +
+                    '<td class="p-2.5 sm:p-3 text-[11px] whitespace-nowrap">' + waHtml + '</td>' +
+                    '<td class="p-2.5 sm:p-3">' + unsurLembagaHtml + '</td>' +
+                    '<td class="p-2.5 sm:p-3 text-center whitespace-nowrap">' +
+                        '<span class="px-2.5 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider inline-block ' + badgeClass + '">' + urutanLabel + '</span>' +
+                        '<div class="text-[9px] text-slate-400 mt-1">' + unsur + ' &bull; ' + kecamatan + '</div>' +
+                    '</td>' +
+                    '<td class="p-2.5 sm:p-3 font-mono text-[11px] text-slate-300 whitespace-nowrap">' + (p.Timestamp || '-') + '</td>' +
+                '</tr>';
             });
             tbody.innerHTML = html;
 
@@ -1285,10 +1355,10 @@
             const pageNum = document.getElementById('pageNumberDisplay');
 
             if (infoText) {
-                if (totalRows === 0) infoText.innerText = `Menampilkan 0 data`;
-                else infoText.innerText = `${startIdx + 1}-${Math.min(endIdx, totalRows)} dari ${totalRows} data`;
+                if (totalRows === 0) infoText.innerText = 'Menampilkan 0 data';
+                else infoText.innerText = (startIdx + 1) + '-' + Math.min(endIdx, totalRows) + ' dari ' + totalRows + ' data';
             }
-            if (pageNum) pageNum.innerText = `Hal ${currentPagePeserta}/${totalPages}`;
+            if (pageNum) pageNum.innerText = 'Hal ' + currentPagePeserta + '/' + totalPages;
             if (btnPrev) btnPrev.disabled = currentPagePeserta === 1;
             if (btnNext) btnNext.disabled = currentPagePeserta === totalPages || totalPages === 0;
         }
@@ -1317,40 +1387,41 @@
 
         function filterPesertaTable() {
             const query = document.getElementById('searchPeserta').value.toLowerCase();
-            const filtered = (globalAppData.peserta || []).filter(p => {
-                const searchStr = `${p.ID_Pendaftaran || ''} ${p.Nama_Pemain || ''} ${p.Nomor_HP || ''} ${p.Unsur || p.Satker || ''} ${p.Nama_Lembaga || ''} ${p.Nama_Kecamatan || ''} ${p.Status_Pemain || ''} ${p.Timestamp || ''}`.toLowerCase();
+            const filtered = (globalAppData.peserta || []).filter(function(p) {
+                const searchStr = ((p.ID_Pendaftaran || '') + ' ' + (p.Nama_Pemain || '') + ' ' + (p.Nomor_HP || '') + ' ' + (p.Unsur || p.Satker || '') + ' ' + (p.Nama_Lembaga || '') + ' ' + (p.Nama_Kecamatan || '') + ' ' + (p.Status_Pemain || '') + ' ' + (p.Timestamp || '')).toLowerCase();
                 return searchStr.includes(query);
             });
             currentPagePeserta = 1;
             renderPesertaTable(filtered);
         }
 
-        function renderSquadList(filterQuery = '') {
+        function renderSquadList(filterQuery) {
+            const q = filterQuery || '';
             const container = document.getElementById('squadListContent');
             if (!container) return;
             
-            const allTeams = [...daftarKecamatanMusiRawas, "Kemenag Internal", "Kemenhaj Musi Rawas"];
+            const allTeams = daftarKecamatanMusiRawas.concat(["Kemenag Internal", "Kemenhaj Musi Rawas"]);
             const urutanMap = buildUrutanPerUnsurKecamatanMap(globalAppData.peserta || []);
             
             let html = '';
-            allTeams.forEach(kec => {
-                let players = (globalAppData.peserta || []).filter(p => 
-                    p.Nama_Kecamatan === kec && 
-                    p.Status_Pemain && 
-                    (p.Status_Pemain === 'Inti' || p.Status_Pemain.includes('Prioritas'))
-                );
+            allTeams.forEach(function(kec) {
+                let players = (globalAppData.peserta || []).filter(function(p) {
+                    return p.Nama_Kecamatan === kec &&
+                        p.Status_Pemain &&
+                        (p.Status_Pemain === 'Inti' || p.Status_Pemain.includes('Prioritas'));
+                });
                 
-                if (filterQuery) {
-                    players = players.filter(p => 
-                        (p.Nama_Pemain || '').toLowerCase().includes(filterQuery) || 
-                        (p.Nama_Kecamatan || '').toLowerCase().includes(filterQuery) ||
-                        (p.Unsur || '').toLowerCase().includes(filterQuery) ||
-                        (p.Nama_Lembaga || '').toLowerCase().includes(filterQuery)
-                    );
-                    if (players.length === 0 && !kec.toLowerCase().includes(filterQuery)) return;
+                if (q) {
+                    players = players.filter(function(p) {
+                        return (p.Nama_Pemain || '').toLowerCase().includes(q) ||
+                            (p.Nama_Kecamatan || '').toLowerCase().includes(q) ||
+                            (p.Unsur || '').toLowerCase().includes(q) ||
+                            (p.Nama_Lembaga || '').toLowerCase().includes(q);
+                    });
+                    if (players.length === 0 && !kec.toLowerCase().includes(q)) return;
                 }
                 
-                players.sort((a, b) => {
+                players.sort(function(a, b) {
                     const unsurCmp = (a.Unsur || '').localeCompare(b.Unsur || '');
                     if (unsurCmp !== 0) return unsurCmp;
                     return (urutanMap[a.ID_Pendaftaran] || 99) - (urutanMap[b.ID_Pendaftaran] || 99);
@@ -1362,34 +1433,32 @@
                 if (players.length === 0) {
                     liHtml = '<p class="text-[10px] text-slate-500 italic py-2">Tidak ada data skuad.</p>';
                 } else {
-                    players.forEach(p => {
+                    players.forEach(function(p) {
                         const urutanKe = urutanMap[p.ID_Pendaftaran] || 1;
                         const waHtmlSquad = buildWhatsAppHtml(p.Nomor_HP, 'text-[10px] text-cyan-400 hover:text-neonGreen');
                         
-                        liHtml += `<div class="flex flex-col py-2 border-b border-slate-700/50 last:border-0">
-                            <div class="flex justify-between items-start gap-2">
-                                <span class="font-bold text-xs text-white">${p.Nama_Pemain || '-'}</span>
-                                <span class="text-[9px] font-bold text-neonGreen bg-neonGreen/10 px-1.5 py-0.5 rounded whitespace-nowrap">Urutan ke-${urutanKe}</span>
-                            </div>
-                            <div class="flex justify-between items-center mt-1 gap-2">
-                                <span class="text-[10px] text-slate-400 truncate">${p.Unsur || '-'}${p.Nama_Lembaga ? ' - ' + p.Nama_Lembaga : ''}</span>
-                                ${waHtmlSquad}
-                            </div>
-                        </div>`;
+                        liHtml += '<div class="flex flex-col py-2 border-b border-slate-700/50 last:border-0">' +
+                            '<div class="flex justify-between items-start gap-2">' +
+                                '<span class="font-bold text-xs text-white">' + (p.Nama_Pemain || '-') + '</span>' +
+                                '<span class="text-[9px] font-bold text-neonGreen bg-neonGreen/10 px-1.5 py-0.5 rounded whitespace-nowrap">Urutan ke-' + urutanKe + '</span>' +
+                            '</div>' +
+                            '<div class="flex justify-between items-center mt-1 gap-2">' +
+                                '<span class="text-[10px] text-slate-400 truncate">' + (p.Unsur || '-') + (p.Nama_Lembaga ? ' - ' + p.Nama_Lembaga : '') + '</span>' +
+                                waHtmlSquad +
+                            '</div>' +
+                        '</div>';
                     });
                 }
                 
                 let cardClass = isWO ? "glass-panel p-4 rounded-xl border-2 border-rose-500/50 shadow-md relative overflow-hidden" : "glass-panel p-4 rounded-xl border border-slate-700 shadow-md";
                 let titleClass = isWO ? "font-bold text-sm text-rose-400 border-b border-rose-500/30 pb-2 mb-2" : "font-bold text-sm text-amber-400 border-b border-slate-700 pb-2 mb-2";
-                let woBadge = isWO ? `<div class="absolute -right-7 top-4 bg-rose-600 text-white text-[9px] font-black py-1 px-8 transform rotate-45 shadow-lg tracking-widest text-center">WO (< 5)</div>` : '';
+                let woBadge = isWO ? '<div class="absolute -right-7 top-4 bg-rose-600 text-white text-[9px] font-black py-1 px-8 transform rotate-45 shadow-lg tracking-widest text-center">WO (&lt; 5)</div>' : '';
 
-                html += `<div class="${cardClass}">
-                    ${woBadge}
-                    <h3 class="${titleClass}"><i class="fa-solid fa-location-dot mr-2"></i>${kec}</h3>
-                    <div class="space-y-1">
-                        ${liHtml}
-                    </div>
-                </div>`;
+                html += '<div class="' + cardClass + '">' +
+                    woBadge +
+                    '<h3 class="' + titleClass + '"><i class="fa-solid fa-location-dot mr-2"></i>' + kec + '</h3>' +
+                    '<div class="space-y-1">' + liHtml + '</div>' +
+                '</div>';
             });
             container.innerHTML = html;
         }
@@ -1405,13 +1474,13 @@
             let html = '<option value="">-- Pilih Peserta --</option>';
             const urutanMap = buildUrutanPerUnsurKecamatanMap(globalAppData.peserta || []);
             
-            let sortedData = [...(globalAppData.peserta || [])].sort((a, b) => {
+            let sortedData = (globalAppData.peserta || []).slice().sort(function(a, b) {
                 return (a.Nama_Kecamatan || '').localeCompare(b.Nama_Kecamatan || '');
             });
             
-            sortedData.forEach(p => {
+            sortedData.forEach(function(p) {
                 const ur = urutanMap[p.ID_Pendaftaran] || 1;
-                html += `<option value="${p.ID_Pendaftaran}">${p.Nama_Pemain} (${p.Nama_Kecamatan} - ${p.Unsur} Urutan ${ur})</option>`;
+                html += '<option value="' + p.ID_Pendaftaran + '">' + p.Nama_Pemain + ' (' + p.Nama_Kecamatan + ' - ' + p.Unsur + ' Urutan ' + ur + ')</option>';
             });
             select.innerHTML = html;
         }
@@ -1420,7 +1489,7 @@
             const idReg = document.getElementById('selectPesertaCetak').value;
             const previewBox = document.getElementById('idCardPreviewBox');
             if (!idReg) return previewBox.classList.add('hidden');
-            const p = (globalAppData.peserta || []).find(item => item.ID_Pendaftaran === idReg);
+            const p = (globalAppData.peserta || []).find(function(item) { return item.ID_Pendaftaran === idReg; });
             if (!p) return;
 
             const urutanMap = buildUrutanPerUnsurKecamatanMap(globalAppData.peserta || []);
@@ -1428,23 +1497,23 @@
 
             document.getElementById('cardNamaPemain').innerText = p.Nama_Pemain || '-';
             document.getElementById('cardKecamatan').innerText = p.Nama_Kecamatan || '-';
-            document.getElementById('cardUnsur').innerText = (p.Unsur || p.Satker || '-') + (p.Nama_Lembaga ? ` (${p.Nama_Lembaga})` : '');
+            document.getElementById('cardUnsur').innerText = (p.Unsur || p.Satker || '-') + (p.Nama_Lembaga ? ' (' + p.Nama_Lembaga + ')' : '');
             document.getElementById('cardIdReg').innerText = p.ID_Pendaftaran || '-';
             document.getElementById('cardTimestamp').innerText = p.Timestamp || '-';
             
             const isCadangan = (p.Status_Pemain || '').toLowerCase() === 'cadangan';
             const badge = document.getElementById('cardStatusBadge');
-            badge.innerText = isCadangan ? `URUTAN KE-${ur} (CADANGAN)` : `URUTAN KE-${ur} (${(p.Unsur || '').toUpperCase()})`;
+            badge.innerText = isCadangan ? ('URUTAN KE-' + ur + ' (CADANGAN)') : ('URUTAN KE-' + ur + ' (' + (p.Unsur || '').toUpperCase() + ')');
             badge.className = isCadangan
                 ? 'text-[9px] px-1.5 py-0.5 mt-0.5 inline-block rounded font-bold bg-amber-400 text-darkBg'
                 : 'text-[9px] px-1.5 py-0.5 mt-0.5 inline-block rounded font-bold bg-neonGreen text-darkBg';
 
-            const initials = (p.Nama_Pemain || 'PM').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            const initials = (p.Nama_Pemain || 'PM').split(' ').map(function(n) { return n[0]; }).join('').substring(0, 2).toUpperCase();
             document.getElementById('cardAvatarInitials').innerText = initials;
 
             const qrContainer = document.getElementById('qrcodeContainer');
             qrContainer.innerHTML = '';
-            new QRCode(qrContainer, { text: `VERIFIED-HAB-MURA|${p.ID_Pendaftaran}|${p.Nama_Pemain}|${p.Nama_Kecamatan}|${p.Timestamp}`, width: 68, height: 68, colorDark: "#0b0f19", colorLight: "#ffffff" });
+            new QRCode(qrContainer, { text: 'VERIFIED-HAB-MURA|' + p.ID_Pendaftaran + '|' + p.Nama_Pemain + '|' + p.Nama_Kecamatan + '|' + p.Timestamp, width: 68, height: 68, colorDark: "#0b0f19", colorLight: "#ffffff" });
             previewBox.classList.remove('hidden');
         }
 
@@ -1470,7 +1539,7 @@
 
             window.print();
 
-            setTimeout(() => {
+            setTimeout(function() {
                 previewBox.classList.remove('print-active');
             }, 800);
         }
@@ -1482,7 +1551,7 @@
                 tPeserta.innerHTML = '<tr><td colspan="6" class="p-3 text-center text-slate-500">Belum ada data.</td></tr>';
             } else {
                 const urutanMap = buildUrutanPerUnsurKecamatanMap(globalAppData.peserta || []);
-                let sortedData = [...globalAppData.peserta].sort((a, b) => {
+                let sortedData = globalAppData.peserta.slice().sort(function(a, b) {
                     const kecCmp = (a.Nama_Kecamatan || '').localeCompare(b.Nama_Kecamatan || '');
                     if (kecCmp !== 0) return kecCmp;
                     const unsurCmp = (a.Unsur || '').localeCompare(b.Unsur || '');
@@ -1491,24 +1560,175 @@
                 });
 
                 let html = '';
-                sortedData.forEach(p => {
+                sortedData.forEach(function(p) {
                     const unsur = p.Unsur || p.Satker || '-';
                     let gabungLembaga = unsur;
-                    if (p.Nama_Lembaga) gabungLembaga += ` - ${p.Nama_Lembaga}`;
-                    if (p.Nama_Kecamatan && p.Nama_Kecamatan !== unsur) gabungLembaga += ` (${p.Nama_Kecamatan})`;
+                    if (p.Nama_Lembaga) gabungLembaga += ' - ' + p.Nama_Lembaga;
+                    if (p.Nama_Kecamatan && p.Nama_Kecamatan !== unsur) gabungLembaga += ' (' + p.Nama_Kecamatan + ')';
                     const ur = urutanMap[p.ID_Pendaftaran] || 1;
 
-                    html += `<tr>
-                        <td class="border border-slate-400 p-1.5 font-mono">${p.ID_Pendaftaran || '-'}</td>
-                        <td class="border border-slate-400 p-1.5 font-bold">${p.Nama_Pemain || '-'}</td>
-                        <td class="border border-slate-400 p-1.5 font-mono">${getCleanPhoneDisplay(p.Nomor_HP)}</td>
-                        <td class="border border-slate-400 p-1.5">${gabungLembaga}</td>
-                        <td class="border border-slate-400 p-1.5 text-center font-bold">Urutan ke-${ur}</td>
-                        <td class="border border-slate-400 p-1.5 font-mono">${p.Timestamp || '-'}</td>
-                    </tr>`;
+                    html += '<tr>' +
+                        '<td class="border border-slate-400 p-1.5 font-mono">' + (p.ID_Pendaftaran || '-') + '</td>' +
+                        '<td class="border border-slate-400 p-1.5 font-bold">' + (p.Nama_Pemain || '-') + '</td>' +
+                        '<td class="border border-slate-400 p-1.5 font-mono">' + getCleanPhoneDisplay(p.Nomor_HP) + '</td>' +
+                        '<td class="border border-slate-400 p-1.5">' + gabungLembaga + '</td>' +
+                        '<td class="border border-slate-400 p-1.5 text-center font-bold">Urutan ke-' + ur + '</td>' +
+                        '<td class="border border-slate-400 p-1.5 font-mono">' + (p.Timestamp || '-') + '</td>' +
+                    '</tr>';
                 });
                 tPeserta.innerHTML = html;
             }
+        }
+
+        // Helper ambil daftar pemain inti suatu tim untuk ditampilkan di podium juara
+        function getPodiumRosterHtml(teamName) {
+            if (!teamName || teamName === '-' || teamName.indexOf('Belum') !== -1 || teamName.indexOf('Menunggu') !== -1 || teamName.indexOf('Pemenang') !== -1 || teamName.indexOf('Kalah') !== -1) {
+                return '';
+            }
+            var players = (globalAppData.peserta || []).filter(function(p) {
+                return p.Nama_Kecamatan === teamName && p.Status_Pemain && (p.Status_Pemain === 'Inti' || p.Status_Pemain.indexOf('Prioritas') !== -1);
+            });
+            if (players.length === 0) return '';
+
+            var listHtml = '<div class="mt-3 pt-3 border-t border-white/10 text-left">' +
+                '<p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 text-center">Skuad Pemain</p>' +
+                '<div class="flex flex-wrap justify-center gap-1.5">';
+            players.forEach(function(p) {
+                listHtml += '<span class="px-2 py-0.5 rounded-md bg-darkBg/80 border border-white/10 text-[10px] text-slate-200 font-semibold">' + (p.Nama_Pemain || '-') + '</span>';
+            });
+            listHtml += '</div></div>';
+            return listHtml;
+        }
+
+        // Render Tampilan Daftar Juara 1, 2, dan 3 yang Besar di Halaman Bagan setelah Grand Final Selesai
+        function renderPodiumJuara() {
+            const container = document.getElementById('podiumJuaraContainer');
+            if (!container) return;
+
+            const matches = globalAppData.jadwalSkor || [];
+            const m16 = matches.find(function(m) { return m.ID_Match === 'MATCH-016'; });
+            const m15 = matches.find(function(m) { return m.ID_Match === 'MATCH-015'; });
+
+            const isGrandFinalDone = m16 &&
+                m16.Status_Match === 'Selesai' &&
+                m16.Pemenang &&
+                m16.Pemenang !== '-' &&
+                m16.Pemenang !== 'Seri / Adu Penalti';
+
+            if (!isGrandFinalDone) {
+                container.classList.add('hidden');
+                container.innerHTML = '';
+                return;
+            }
+
+            const juara1 = m16.Pemenang;
+            const juara2 = (m16.Pemenang === m16.Tim_A) ? m16.Tim_B : m16.Tim_A;
+            let juara3 = 'Menunggu Hasil Perebutan Juara 3';
+
+            if (m15 && m15.Status_Match === 'Selesai' && m15.Pemenang && m15.Pemenang !== '-' && m15.Pemenang !== 'Seri / Adu Penalti') {
+                juara3 = m15.Pemenang;
+            }
+
+            const skorFinal = m16.Skor_A + ' - ' + m16.Skor_B;
+            const skorJuara3 = (m15 && m15.Status_Match === 'Selesai') ? ('Skor: ' + m15.Skor_A + ' - ' + m15.Skor_B) : 'Belum Selesai';
+
+            const html = '<div class="glass-panel p-6 sm:p-8 rounded-3xl shadow-2xl border-2 border-amber-400/50 relative overflow-hidden">' +
+                '<div class="absolute -top-24 -left-24 w-64 h-64 bg-amber-500/15 rounded-full blur-3xl pointer-events-none"></div>' +
+                '<div class="absolute -bottom-24 -right-24 w-64 h-64 bg-neonGreen/10 rounded-full blur-3xl pointer-events-none"></div>' +
+                '<div class="relative z-10 text-center space-y-2 mb-8">' +
+                    '<span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[11px] font-black uppercase tracking-widest">' +
+                        '<i class="fa-solid fa-crown"></i> HASIL AKHIR TURNAMEN PORHAB 2026 <i class="fa-solid fa-crown"></i>' +
+                    '</span>' +
+                    '<h2 class="sport-title text-2xl sm:text-4xl font-black text-white uppercase tracking-wider">DAFTAR JUARA RESMI</h2>' +
+                    '<p class="text-xs sm:text-sm text-slate-300">Pekan Olahraga Hari Amal Bakti Kemenag Kabupaten Musi Rawas</p>' +
+                '</div>' +
+
+                '<div class="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-6 items-end">' +
+                    // JUARA 2 (KIRI DI DESKTOP, ORDER 2 DI MOBILE)
+                    '<div class="order-2 lg:order-1 glass-card rounded-2xl p-6 border-2 border-slate-400/50 text-center shadow-xl relative overflow-hidden bg-gradient-to-b from-slate-800/80 to-slate-900/90">' +
+                        '<div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-slate-200 via-slate-300 to-slate-500 text-darkBg flex items-center justify-center text-3xl font-black shadow-lg shadow-slate-400/30 border-2 border-white/60">' +
+                            '<i class="fa-solid fa-medal"></i>' +
+                        '</div>' +
+                        '<span class="inline-block px-3 py-1 rounded-full bg-slate-300/20 border border-slate-300/40 text-slate-200 text-xs font-black tracking-widest uppercase mb-2">JUARA 2</span>' +
+                        '<h3 class="text-xl sm:text-2xl font-black text-white tracking-tight leading-snug">' + juara2 + '</h3>' +
+                        '<p class="text-xs text-slate-400 mt-1 font-semibold">Runner-Up Grand Final (' + skorFinal + ')</p>' +
+                        getPodiumRosterHtml(juara2) +
+                    '</div>' +
+
+                    // JUARA 1 (TENGAH PALING BESAR & TINGGI, ORDER 1 DI MOBILE)
+                    '<div class="order-1 lg:order-2 glass-card rounded-3xl p-7 sm:p-8 border-2 border-amber-400 text-center shadow-2xl shadow-amber-500/20 relative overflow-hidden bg-gradient-to-b from-amber-500/20 via-slate-900/90 to-slate-950 lg:-mt-6">' +
+                        '<div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500"></div>' +
+                        '<div class="w-24 h-24 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-yellow-200 via-amber-400 to-amber-600 text-darkBg flex items-center justify-center text-5xl font-black shadow-2xl shadow-amber-500/50 border-2 border-yellow-100 pulse-glow">' +
+                            '<i class="fa-solid fa-trophy"></i>' +
+                        '</div>' +
+                        '<span class="inline-block px-4 py-1.5 rounded-full bg-amber-400 text-darkBg text-xs sm:text-sm font-black tracking-widest uppercase shadow-md mb-3">JUARA 1 &bull; CHAMPION</span>' +
+                        '<h3 class="sport-title text-2xl sm:text-3xl font-black text-amber-300 tracking-wide leading-tight">' + juara1 + '</h3>' +
+                        '<p class="text-xs sm:text-sm text-neonGreen mt-1.5 font-bold">Pemenang Grand Final (' + skorFinal + ')</p>' +
+                        getPodiumRosterHtml(juara1) +
+                    '</div>' +
+
+                    // JUARA 3 (KANAN DI DESKTOP, ORDER 3 DI MOBILE)
+                    '<div class="order-3 glass-card rounded-2xl p-6 border-2 border-orange-500/50 text-center shadow-xl relative overflow-hidden bg-gradient-to-b from-orange-950/50 to-slate-900/90">' +
+                        '<div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-orange-300 via-amber-600 to-orange-800 text-white flex items-center justify-center text-3xl font-black shadow-lg shadow-orange-500/30 border-2 border-orange-300/60">' +
+                            '<i class="fa-solid fa-award"></i>' +
+                        '</div>' +
+                        '<span class="inline-block px-3 py-1 rounded-full bg-orange-500/20 border border-orange-400/40 text-orange-300 text-xs font-black tracking-widest uppercase mb-2">JUARA 3</span>' +
+                        '<h3 class="text-xl sm:text-2xl font-black text-white tracking-tight leading-snug">' + juara3 + '</h3>' +
+                        '<p class="text-xs text-orange-300/90 mt-1 font-semibold">Perebutan Juara 3 (' + skorJuara3 + ')</p>' +
+                        getPodiumRosterHtml(juara3) +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+
+            container.innerHTML = html;
+            container.classList.remove('hidden');
+        }
+
+        // Helper penyusun pasangan bagan lengkap dengan garis konektor (bracket lines) presisi
+        function renderBracketPair(topContent, bottomContent, nextContent, side, isTopDone, isBottomDone) {
+            const topBorderColor = isTopDone ? 'border-neonGreen/70' : 'border-slate-600/80';
+            const bottomBorderColor = isBottomDone ? 'border-neonGreen/70' : 'border-slate-600/80';
+            const midBgColor = (isTopDone && isBottomDone) ? 'bg-neonGreen/70' : 'bg-slate-600/80';
+
+            if (side === 'left') {
+                return '<div class="flex items-center">' +
+                    '<div class="flex flex-col justify-center">' +
+                        '<div class="flex items-center py-2">' +
+                            '<div class="flex-shrink-0">' + topContent + '</div>' +
+                            '<div class="w-4 self-stretch relative flex-shrink-0">' +
+                                '<div class="absolute top-1/2 bottom-0 left-0 right-0 border-t-2 border-r-2 ' + topBorderColor + ' rounded-tr-md"></div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="flex items-center py-2">' +
+                            '<div class="flex-shrink-0">' + bottomContent + '</div>' +
+                            '<div class="w-4 self-stretch relative flex-shrink-0">' +
+                                '<div class="absolute top-0 bottom-1/2 left-0 right-0 border-b-2 border-r-2 ' + bottomBorderColor + ' rounded-br-md"></div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="w-4 h-0.5 ' + midBgColor + ' flex-shrink-0"></div>' +
+                    '<div class="flex-shrink-0">' + nextContent + '</div>' +
+                '</div>';
+            }
+
+            return '<div class="flex items-center">' +
+                '<div class="flex-shrink-0">' + nextContent + '</div>' +
+                '<div class="w-4 h-0.5 ' + midBgColor + ' flex-shrink-0"></div>' +
+                '<div class="flex flex-col justify-center">' +
+                    '<div class="flex items-center py-2">' +
+                        '<div class="w-4 self-stretch relative flex-shrink-0">' +
+                            '<div class="absolute top-1/2 bottom-0 left-0 right-0 border-t-2 border-l-2 ' + topBorderColor + ' rounded-tl-md"></div>' +
+                        '</div>' +
+                        '<div class="flex-shrink-0">' + topContent + '</div>' +
+                    '</div>' +
+                    '<div class="flex items-center py-2">' +
+                        '<div class="w-4 self-stretch relative flex-shrink-0">' +
+                            '<div class="absolute top-0 bottom-1/2 left-0 right-0 border-b-2 border-l-2 ' + bottomBorderColor + ' rounded-bl-md"></div>' +
+                        '</div>' +
+                        '<div class="flex-shrink-0">' + bottomContent + '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
         }
 
         function renderDynamicBracket(containerId, isInteractive) {
@@ -1517,100 +1737,245 @@
 
             let matches = globalAppData.jadwalSkor || getDefaultJadwalSkor();
 
-            let m1 = matches.find(m => m.ID_Match.includes('001')) || matches[0];
-            let m2 = matches.find(m => m.ID_Match.includes('002')) || matches[1];
-            let m3 = matches.find(m => m.ID_Match.includes('003')) || matches[2];
-            let m4 = matches.find(m => m.ID_Match.includes('004')) || matches[3];
-            let m5 = matches.find(m => m.ID_Match.includes('005')) || matches[4];
-            let m6 = matches.find(m => m.ID_Match.includes('006')) || matches[5];
-            let m7 = matches.find(m => m.ID_Match.includes('007')) || matches[6];
-            let m8 = matches.find(m => m.ID_Match.includes('008')) || matches[7];
-            let m9 = matches.find(m => m.ID_Match.includes('009')) || matches[8];
-            let m10 = matches.find(m => m.ID_Match.includes('010')) || matches[9];
-            let m11 = matches.find(m => m.ID_Match.includes('011')) || matches[10];
-            let m12 = matches.find(m => m.ID_Match.includes('012')) || matches[11];
-            let m13 = matches.find(m => m.ID_Match.includes('013')) || matches[12];
-            let m14 = matches.find(m => m.ID_Match.includes('014')) || matches[13];
-            let m15 = matches.find(m => m.ID_Match.includes('015')) || matches[14];
+            let m1 = matches.find(function(m) { return m.ID_Match.includes('001'); }) || matches[0];
+            let m2 = matches.find(function(m) { return m.ID_Match.includes('002'); }) || matches[1];
+            let m3 = matches.find(function(m) { return m.ID_Match.includes('003'); }) || matches[2];
+            let m4 = matches.find(function(m) { return m.ID_Match.includes('004'); }) || matches[3];
+            let m5 = matches.find(function(m) { return m.ID_Match.includes('005'); }) || matches[4];
+            let m6 = matches.find(function(m) { return m.ID_Match.includes('006'); }) || matches[5];
+            let m7 = matches.find(function(m) { return m.ID_Match.includes('007'); }) || matches[6];
+            let m8 = matches.find(function(m) { return m.ID_Match.includes('008'); }) || matches[7];
+            let m9 = matches.find(function(m) { return m.ID_Match.includes('009'); }) || matches[8];
+            let m10 = matches.find(function(m) { return m.ID_Match.includes('010'); }) || matches[9];
+            let m11 = matches.find(function(m) { return m.ID_Match.includes('011'); }) || matches[10];
+            let m12 = matches.find(function(m) { return m.ID_Match.includes('012'); }) || matches[11];
+            let m13 = matches.find(function(m) { return m.ID_Match.includes('013'); }) || matches[12];
+            let m14 = matches.find(function(m) { return m.ID_Match.includes('014'); }) || matches[13];
+            let m15 = matches.find(function(m) { return m.ID_Match.includes('015'); }) || matches[14];
+            let m16 = matches.find(function(m) { return m.ID_Match.includes('016'); }) || matches[15];
 
-            let html = '<div class="min-w-[1100px] flex items-stretch justify-between py-6 px-2 gap-4">' +
-                '<div class="flex flex-col justify-around flex-1 space-y-2">' +
-                    '<div class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">16 Besar</div>' +
-                    renderMatchCard(m1, '1', isInteractive) + renderMatchCard(m2, '2', isInteractive) +
-                    renderMatchCard(m3, '3', isInteractive) + renderMatchCard(m4, '4', isInteractive) +
+            const isDone = function(m) { return m && m.Status_Match === 'Selesai'; };
+
+            // Sisi Kiri (Match Ganjil: 1 & 3 -> 9, 5 & 7 -> 11, lalu 9 & 11 -> 13)
+            const leftTopPair = renderBracketPair(
+                renderMatchCard(m1, '1', isInteractive),
+                renderMatchCard(m3, '3', isInteractive),
+                renderMatchCard(m9, '9', isInteractive),
+                'left', isDone(m1), isDone(m3)
+            );
+            const leftBottomPair = renderBracketPair(
+                renderMatchCard(m5, '5', isInteractive),
+                renderMatchCard(m7, '7', isInteractive),
+                renderMatchCard(m11, '11', isInteractive),
+                'left', isDone(m5), isDone(m7)
+            );
+            const leftTree = renderBracketPair(
+                leftTopPair,
+                leftBottomPair,
+                renderMatchCard(m13, '13', isInteractive),
+                'left', isDone(m9), isDone(m11)
+            );
+
+            // Sisi Kanan (Match Genap: 2 & 4 -> 10, 6 & 8 -> 12, lalu 10 & 12 -> 14)
+            const rightTopPair = renderBracketPair(
+                renderMatchCard(m2, '2', isInteractive),
+                renderMatchCard(m4, '4', isInteractive),
+                renderMatchCard(m10, '10', isInteractive),
+                'right', isDone(m2), isDone(m4)
+            );
+            const rightBottomPair = renderBracketPair(
+                renderMatchCard(m6, '6', isInteractive),
+                renderMatchCard(m8, '8', isInteractive),
+                renderMatchCard(m12, '12', isInteractive),
+                'right', isDone(m6), isDone(m8)
+            );
+            const rightTree = renderBracketPair(
+                rightTopPair,
+                rightBottomPair,
+                renderMatchCard(m14, '14', isInteractive),
+                'right', isDone(m10), isDone(m12)
+            );
+
+            const sfLeftLineColor = isDone(m13) ? 'bg-amber-400/80' : 'bg-slate-600/80';
+            const sfRightLineColor = isDone(m14) ? 'bg-amber-400/80' : 'bg-slate-600/80';
+
+            let html = '<div class="min-w-[1340px] py-4 px-2">' +
+                // Header Label Babak sejajar dengan setiap kolom kartu
+                '<div class="flex items-center justify-center mb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">' +
+                    '<div class="w-40 text-center">16 Besar</div>' +
+                    '<div class="w-8"></div>' +
+                    '<div class="w-40 text-center">Perempat Final</div>' +
+                    '<div class="w-8"></div>' +
+                    '<div class="w-40 text-center">Semifinal</div>' +
+                    '<div class="w-5"></div>' +
+                    '<div class="w-48 text-center text-amber-400">Final &amp; Juara 3</div>' +
+                    '<div class="w-5"></div>' +
+                    '<div class="w-40 text-center">Semifinal</div>' +
+                    '<div class="w-8"></div>' +
+                    '<div class="w-40 text-center">Perempat Final</div>' +
+                    '<div class="w-8"></div>' +
+                    '<div class="w-40 text-center">16 Besar</div>' +
                 '</div>' +
-                '<div class="flex flex-col justify-around flex-1 py-10 space-y-8">' +
-                    '<div class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">Perempat Final</div>' +
-                    renderMatchCard(m9, '9', isInteractive) + renderMatchCard(m10, '10', isInteractive) +
-                '</div>' +
-                '<div class="flex flex-col justify-center flex-1">' +
-                    '<div class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-4">Semifinal</div>' +
-                    renderMatchCard(m13, '13', isInteractive) +
-                '</div>' +
-                '<div class="flex flex-col items-center justify-center flex-[1.2] px-2">' +
-                    '<div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-700 flex items-center justify-center text-darkBg text-2xl shadow-2xl shadow-amber-500/40 border-2 border-yellow-200 mb-2">' +
-                        '<i class="fa-solid fa-trophy"></i>' +
+
+                // Konten Pohon Bagan dengan Garis Konektor
+                '<div class="flex items-center justify-center">' +
+                    leftTree +
+                    '<div class="w-5 h-0.5 ' + sfLeftLineColor + ' flex-shrink-0"></div>' +
+
+                    // Kolom Tengah: Grand Final sejajar Semifinal, Perebutan Juara 3 di bawahnya
+                    '<div class="relative w-48 flex flex-col items-center justify-center flex-shrink-0">' +
+                        '<div class="absolute bottom-[calc(50%+56px)] flex flex-col items-center pointer-events-none">' +
+                            '<div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-700 flex items-center justify-center text-darkBg text-xl shadow-2xl shadow-amber-500/40 border-2 border-yellow-200 mb-1.5">' +
+                                '<i class="fa-solid fa-trophy"></i>' +
+                            '</div>' +
+                            '<h4 class="font-black text-[11px] uppercase tracking-widest text-amber-400">GRAND FINAL</h4>' +
+                        '</div>' +
+
+                        '<div class="w-full">' + renderMatchCard(m16, '16', isInteractive, 'w-48') + '</div>' +
+
+                        '<div class="absolute top-[calc(50%+62px)] w-full pt-3 border-t border-dashed border-slate-700/80 flex flex-col items-center">' +
+                            '<div class="flex items-center gap-1.5 mb-2">' +
+                                '<span class="w-4 h-4 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/40 flex items-center justify-center text-[9px]"><i class="fa-solid fa-award"></i></span>' +
+                                '<h4 class="font-black text-[10px] uppercase tracking-widest text-orange-400">PEREBUTAN JUARA 3</h4>' +
+                            '</div>' +
+                            '<div class="w-full">' + renderMatchCard(m15, '15', isInteractive, 'w-48') + '</div>' +
+                        '</div>' +
                     '</div>' +
-                    '<h4 class="font-black text-[11px] uppercase tracking-widest text-amber-400 mb-3">GRAND FINAL</h4>' +
-                    '<div class="w-full">' + renderMatchCard(m15, '15', isInteractive) + '</div>' +
-                '</div>' +
-                '<div class="flex flex-col justify-center flex-1">' +
-                    '<div class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-4">Semifinal</div>' +
-                    renderMatchCard(m14, '14', isInteractive) +
-                '</div>' +
-                '<div class="flex flex-col justify-around flex-1 py-10 space-y-8">' +
-                    '<div class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">Perempat Final</div>' +
-                    renderMatchCard(m11, '11', isInteractive) + renderMatchCard(m12, '12', isInteractive) +
-                '</div>' +
-                '<div class="flex flex-col justify-around flex-1 space-y-2">' +
-                    '<div class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">16 Besar</div>' +
-                    renderMatchCard(m5, '5', isInteractive) + renderMatchCard(m6, '6', isInteractive) +
-                    renderMatchCard(m7, '7', isInteractive) + renderMatchCard(m8, '8', isInteractive) +
+
+                    '<div class="w-5 h-0.5 ' + sfRightLineColor + ' flex-shrink-0"></div>' +
+                    rightTree +
                 '</div>' +
             '</div>';
             container.innerHTML = html;
         }
 
-        function renderMatchCard(m, seqNum, isInteractive) {
+        function renderMatchCard(m, seqNum, isInteractive, customWidthClass) {
             if (!m) return '';
+            let widthClass = customWidthClass || 'w-40';
             let badgeClass = m.Status_Match === 'Selesai' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-300';
-            let clickAttr = isInteractive ? `onclick="openPanitiaScoreModal('${m.ID_Match}')"` : '';
+            let borderHighlight = 'border-slate-700';
+            if (m.ID_Match === 'MATCH-016') borderHighlight = 'border-amber-400/60';
+            else if (m.ID_Match === 'MATCH-015') borderHighlight = 'border-orange-500/50';
+
+            let clickAttr = isInteractive ? ('onclick="openPanitiaScoreModal(\'' + m.ID_Match + '\')"') : '';
             let hoverClass = isInteractive ? 'hover:border-cyan-500 hover:bg-slate-900/80 cursor-pointer shadow-cyan-500/10' : '';
             
             let matchNum = m.ID_Match.replace(/\D/g, '');
             if (!matchNum) matchNum = seqNum;
 
-            return `<div ${clickAttr} class="glass-panel p-3 rounded-xl border border-slate-700 ${hoverClass} text-xs shadow-md space-y-1 relative transition">
-                <div class="absolute -top-2.5 left-3 ${badgeClass} text-[9px] font-bold px-2 py-0.5 rounded shadow">Match ${matchNum}</div>
-                <div class="flex justify-between items-center text-white pt-1"><span class="truncate font-medium pr-2 w-3/4" title="${m.Tim_A}">${m.Tim_A}</span><span class="font-bold text-neonGreen text-xs px-1.5 py-0.5 bg-darkBg rounded w-1/4 text-center">${m.Skor_A}</span></div>
-                <div class="flex justify-between items-center text-slate-300"><span class="truncate pr-2 w-3/4" title="${m.Tim_B}">${m.Tim_B}</span><span class="font-bold text-neonGreen text-xs px-1.5 py-0.5 bg-darkBg rounded w-1/4 text-center">${m.Skor_B}</span></div>
-                <div class="text-[9px] text-slate-400 pt-1 border-t border-slate-800 flex justify-between"><span>Status: ${m.Status_Match}</span>${isInteractive ? '<span class="text-cyan-400 font-bold underline">Edit</span>' : ''}</div>
-            </div>`;
+            // Sorot pemenang pada kartu jika pertandingan sudah selesai
+            let winAClass = (m.Status_Match === 'Selesai' && m.Pemenang === m.Tim_A) ? 'text-neonGreen font-bold' : 'text-white font-medium';
+            let winBClass = (m.Status_Match === 'Selesai' && m.Pemenang === m.Tim_B) ? 'text-neonGreen font-bold' : 'text-slate-300';
+            let isPenalti = (m.Status_Match === 'Selesai' && String(m.Skor_A) === String(m.Skor_B) && m.Pemenang && m.Pemenang !== '-');
+
+            return '<div ' + clickAttr + ' class="' + widthClass + ' glass-panel p-2.5 rounded-xl border ' + borderHighlight + ' ' + hoverClass + ' text-xs shadow-md space-y-1 relative transition">' +
+                '<div class="absolute -top-2.5 left-2.5 ' + badgeClass + ' text-[9px] font-bold px-2 py-0.5 rounded shadow">Match ' + matchNum + '</div>' +
+                '<div class="flex justify-between items-center pt-1"><span class="truncate pr-1.5 w-3/4 text-[11px] ' + winAClass + '" title="' + m.Tim_A + '">' + m.Tim_A + '</span><span class="font-bold text-neonGreen text-[11px] px-1.5 py-0.5 bg-darkBg rounded w-1/4 text-center">' + m.Skor_A + '</span></div>' +
+                '<div class="flex justify-between items-center"><span class="truncate pr-1.5 w-3/4 text-[11px] ' + winBClass + '" title="' + m.Tim_B + '">' + m.Tim_B + '</span><span class="font-bold text-neonGreen text-[11px] px-1.5 py-0.5 bg-darkBg rounded w-1/4 text-center">' + m.Skor_B + '</span></div>' +
+                '<div class="text-[9px] text-slate-400 pt-1 border-t border-slate-800 flex justify-between items-center"><span>' + (isPenalti ? 'Penalti' : m.Status_Match) + '</span>' + (isInteractive ? '<span class="text-cyan-400 font-bold underline">Edit</span>' : '') + '</div>' +
+            '</div>';
         }
 
         function openPanitiaScoreModal(idMatch) {
-            const m = (globalAppData.jadwalSkor || []).find(item => item.ID_Match === idMatch);
+            const m = (globalAppData.jadwalSkor || []).find(function(item) { return item.ID_Match === idMatch; });
             if (!m) return;
             document.getElementById('activeMatchId').value = m.ID_Match;
+            document.getElementById('activeTeamAName').value = m.Tim_A;
+            document.getElementById('activeTeamBName').value = m.Tim_B;
             document.getElementById('modalMatchTitle').innerText = m.Babak + ' (' + m.ID_Match + ')';
             document.getElementById('labelTeamA').innerText = m.Tim_A;
             document.getElementById('labelTeamB').innerText = m.Tim_B;
             document.getElementById('inputSkorA').value = m.Skor_A !== undefined ? m.Skor_A : 0;
             document.getElementById('inputSkorB').value = m.Skor_B !== undefined ? m.Skor_B : 0;
+
+            const selPen = document.getElementById('selectPenaltyWinner');
+            if (selPen) {
+                selPen.innerHTML = '<option value="">-- Pilih Pemenang Adu Penalti --</option>' +
+                    '<option value="' + m.Tim_A + '">' + m.Tim_A + '</option>' +
+                    '<option value="' + m.Tim_B + '">' + m.Tim_B + '</option>';
+                if (m.Status_Match === 'Selesai' && String(m.Skor_A) === String(m.Skor_B) && (m.Pemenang === m.Tim_A || m.Pemenang === m.Tim_B)) {
+                    selPen.value = m.Pemenang;
+                }
+            }
+
+            hideScoreInlineError();
+            checkScoreTie();
             document.getElementById('scoreModal').classList.remove('hidden');
         }
 
-        function closeScoreModal() { document.getElementById('scoreModal').classList.add('hidden'); }
+        function checkScoreTie() {
+            const rawA = document.getElementById('inputSkorA').value;
+            const rawB = document.getElementById('inputSkorB').value;
+            const box = document.getElementById('penaltyWinnerBox');
+            hideScoreInlineError();
+
+            if (rawA !== '' && rawB !== '' && parseInt(rawA, 10) === parseInt(rawB, 10)) {
+                box.classList.remove('hidden');
+            } else {
+                box.classList.add('hidden');
+                const selPen = document.getElementById('selectPenaltyWinner');
+                if (selPen) selPen.value = '';
+            }
+        }
+
+        function showScoreInlineError(msg) {
+            const errBox = document.getElementById('scoreErrorInline');
+            if (errBox) {
+                errBox.innerHTML = '<i class="fa-solid fa-circle-exclamation mr-1.5"></i>' + msg;
+                errBox.classList.remove('hidden');
+            }
+        }
+
+        function hideScoreInlineError() {
+            const errBox = document.getElementById('scoreErrorInline');
+            if (errBox) {
+                errBox.innerHTML = '';
+                errBox.classList.add('hidden');
+            }
+        }
+
+        function closeScoreModal() {
+            hideScoreInlineError();
+            document.getElementById('scoreModal').classList.add('hidden');
+        }
 
         async function submitPanitiaScore() {
-            const idMatch = document.getElementById('activeMatchId').value;
-            const skorA = document.getElementById('inputSkorA').value;
-            const skorB = document.getElementById('inputSkorB').value;
+            const idMatch = String(document.getElementById('activeMatchId').value);
+            const rawA = document.getElementById('inputSkorA').value;
+            const rawB = document.getElementById('inputSkorB').value;
+
+            if (rawA === '' || rawB === '') {
+                showScoreInlineError('Skor kedua tim wajib diisi.');
+                return;
+            }
+
+            const skorA = parseInt(rawA, 10);
+            const skorB = parseInt(rawB, 10);
+            if (isNaN(skorA) || isNaN(skorB) || skorA < 0 || skorB < 0) {
+                showScoreInlineError('Skor harus berupa angka positif (minimal 0).');
+                return;
+            }
+
+            let pemenangPenalti = '';
+            if (skorA === skorB) {
+                pemenangPenalti = String(document.getElementById('selectPenaltyWinner').value || '').trim();
+                if (!pemenangPenalti) {
+                    showScoreInlineError('Skor seri! Babak gugur wajib memiliki pemenang. Pilih pemenang adu penalti terlebih dahulu.');
+                    return;
+                }
+            }
+
             closeScoreModal();
             showLoading("Menyimpan Skor...");
 
             try {
-                const res = await fetchAPI('updateSkorMatch', { idMatch, skorA, skorB, status: 'Selesai' });
+                const res = await fetchAPI('updateSkorMatch', {
+                    idMatch: idMatch,
+                    skorA: skorA,
+                    skorB: skorB,
+                    status: 'Selesai',
+                    pemenangPenalti: pemenangPenalti
+                });
                 hideLoading();
                 if (res.status === 'success') {
                     showErrorModal('Berhasil', 'Skor diperbarui!', true);
@@ -1624,8 +1989,21 @@
             }
         }
 
+        function openResetBaganModal() {
+            document.getElementById('resetBaganModal').classList.remove('hidden');
+        }
+
+        function closeResetBaganModal() {
+            document.getElementById('resetBaganModal').classList.add('hidden');
+        }
+
+        function confirmResetBagan() {
+            closeResetBaganModal();
+            resetBaganSistem();
+        }
+
         async function updateAnnouncementAdmin() {
-            const val = document.getElementById('adminAnnouncement').value;
+            const val = String(document.getElementById('adminAnnouncement').value);
             showLoading("Menyimpan...");
             try {
                 const res = await fetchAPI('updatePengaturan', { kunci: 'Pengumuman_Berjalan', nilai: val });
@@ -1641,7 +2019,7 @@
         }
 
         async function updatePinPanitiaAdmin() {
-            const newPin = document.getElementById('adminNewPin').value;
+            const newPin = String(document.getElementById('adminNewPin').value);
             if (!newPin) return showErrorModal("Peringatan", "PIN baru tidak boleh kosong.");
             
             showLoading("Memperbarui PIN...");
@@ -1661,7 +2039,7 @@
         }
 
         async function updatePinAdminAdmin() {
-            const newPin = document.getElementById('adminNewPinAdmin').value;
+            const newPin = String(document.getElementById('adminNewPinAdmin').value);
             if (!newPin) return showErrorModal("Peringatan", "PIN baru tidak boleh kosong.");
             
             showLoading("Memperbarui PIN Admin...");
@@ -1681,7 +2059,7 @@
         }
         
         async function prosesKuotaIntiSistem() {
-            const tgl = document.getElementById('panitiaTglTutup').value;
+            const tgl = String(document.getElementById('panitiaTglTutup').value);
             if (!tgl) return showErrorModal("Peringatan", "Pilih tanggal tutup pendaftaran terlebih dahulu.");
             
             showLoading("Menjalankan Algoritma Round Robin...");
@@ -1735,8 +2113,8 @@
         }
 
         async function simpanJadwalPanitia() {
-            const buka = document.getElementById('panitiaTglBuka').value;
-            const tutup = document.getElementById('panitiaTglTutup').value;
+            const buka = String(document.getElementById('panitiaTglBuka').value);
+            const tutup = String(document.getElementById('panitiaTglTutup').value);
             if (!buka || !tutup) return showErrorModal("Peringatan", "Lengkapi kedua tanggal jadwal terlebih dahulu.");
             
             showLoading("Menyimpan Jadwal...");
@@ -1766,7 +2144,7 @@
             document.getElementById('printReportHasilArea').classList.remove('print-active');
             document.getElementById('printReportHasilArea').classList.add('hidden');
             window.print();
-            setTimeout(() => {
+            setTimeout(function() {
                 document.getElementById('printReportArea').classList.remove('print-active');
                 document.getElementById('printReportArea').classList.add('hidden');
             }, 1000);
@@ -1775,66 +2153,63 @@
         function cetakLaporanHasil() {
             const tMatch = document.getElementById('reportTableMatchBody');
             let matchHtml = '';
-            (globalAppData.jadwalSkor || []).forEach(m => {
-                matchHtml += `<tr>
-                    <td class="border border-slate-400 p-1.5 font-mono">${m.ID_Match}</td>
-                    <td class="border border-slate-400 p-1.5">${m.Babak}</td>
-                    <td class="border border-slate-400 p-1.5">${m.Tim_A} vs ${m.Tim_B}</td>
-                    <td class="border border-slate-400 p-1.5 text-center font-bold">${m.Skor_A} - ${m.Skor_B}</td>
-                    <td class="border border-slate-400 p-1.5 font-bold">${m.Pemenang}</td>
-                </tr>`;
+            (globalAppData.jadwalSkor || []).forEach(function(m) {
+                matchHtml += '<tr>' +
+                    '<td class="border border-slate-400 p-1.5 font-mono">' + m.ID_Match + '</td>' +
+                    '<td class="border border-slate-400 p-1.5">' + m.Babak + '</td>' +
+                    '<td class="border border-slate-400 p-1.5">' + m.Tim_A + ' vs ' + m.Tim_B + '</td>' +
+                    '<td class="border border-slate-400 p-1.5 text-center font-bold">' + m.Skor_A + ' - ' + m.Skor_B + '</td>' +
+                    '<td class="border border-slate-400 p-1.5 font-bold">' + m.Pemenang + '</td>' +
+                '</tr>';
             });
             if (tMatch) tMatch.innerHTML = matchHtml;
 
             let matches = globalAppData.jadwalSkor || [];
-            let m15 = matches.find(m => m.ID_Match === 'MATCH-015');
-            let m13 = matches.find(m => m.ID_Match === 'MATCH-013');
-            let m14 = matches.find(m => m.ID_Match === 'MATCH-014');
+            let m16 = matches.find(function(m) { return m.ID_Match === 'MATCH-016'; });
+            let m15 = matches.find(function(m) { return m.ID_Match === 'MATCH-015'; });
 
-            let j1 = "Belum Ditentukan", j2 = "Belum Ditentukan", j3_1 = "Belum Ditentukan", j3_2 = "Belum Ditentukan";
+            let j1 = "Belum Ditentukan", j2 = "Belum Ditentukan", j3 = "Belum Ditentukan";
 
-            if (m15 && m15.Status_Match === 'Selesai' && m15.Pemenang !== '-') {
-                j1 = m15.Pemenang;
-                j2 = (m15.Pemenang === m15.Tim_A) ? m15.Tim_B : m15.Tim_A;
+            if (m16 && m16.Status_Match === 'Selesai' && m16.Pemenang !== '-' && m16.Pemenang !== 'Seri / Adu Penalti') {
+                j1 = m16.Pemenang;
+                j2 = (m16.Pemenang === m16.Tim_A) ? m16.Tim_B : m16.Tim_A;
             }
-            if (m13 && m13.Status_Match === 'Selesai' && m13.Pemenang !== '-') {
-                j3_1 = (m13.Pemenang === m13.Tim_A) ? m13.Tim_B : m13.Tim_A;
-            }
-            if (m14 && m14.Status_Match === 'Selesai' && m14.Pemenang !== '-') {
-                j3_2 = (m14.Pemenang === m14.Tim_A) ? m14.Tim_B : m14.Tim_A;
+            if (m15 && m15.Status_Match === 'Selesai' && m15.Pemenang !== '-' && m15.Pemenang !== 'Seri / Adu Penalti') {
+                j3 = m15.Pemenang;
             }
 
-            const getRoster = (teamName) => {
-                if (!teamName || teamName === "Belum Ditentukan" || teamName.startsWith("Pemenang") || teamName === "-") return "<p class='text-[10px] text-slate-500 italic mt-2'>Data skuad belum tersedia.</p>";
-                let players = (globalAppData.peserta || []).filter(p => p.Nama_Kecamatan === teamName && p.Status_Pemain && (p.Status_Pemain === 'Inti' || p.Status_Pemain.includes('Prioritas')));
+            const getRoster = function(teamName) {
+                if (!teamName || teamName === "Belum Ditentukan" || teamName.startsWith("Pemenang") || teamName.startsWith("Kalah") || teamName === "-") return "<p class='text-[10px] text-slate-500 italic mt-2'>Data skuad belum tersedia.</p>";
+                let players = (globalAppData.peserta || []).filter(function(p) {
+                    return p.Nama_Kecamatan === teamName && p.Status_Pemain && (p.Status_Pemain === 'Inti' || p.Status_Pemain.includes('Prioritas'));
+                });
                 if (players.length === 0) return "<p class='text-[10px] text-slate-500 italic mt-2'>Tidak ada data pemain.</p>";
-                return "<ul class='list-disc pl-4 mt-2 text-[11px] text-slate-700'>" + players.map(p => `<li><b>${p.Nama_Pemain}</b> <span class="text-slate-500">(${p.Unsur || '-'})</span></li>`).join('') + "</ul>";
+                let items = players.map(function(p) {
+                    return '<li><b>' + p.Nama_Pemain + '</b> <span class="text-slate-500">(' + (p.Unsur || '-') + ')</span></li>';
+                }).join('');
+                return "<ul class='list-disc pl-4 mt-2 text-[11px] text-slate-700'>" + items + "</ul>";
             };
 
             const wContainer = document.getElementById('winnerListContainer');
             if (wContainer) {
-                wContainer.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <div class="border-2 border-amber-400 bg-amber-50 p-4 rounded-xl shadow-sm">
-                            <h5 class="font-black text-amber-600 text-sm mb-1 tracking-wider"><i class="fa-solid fa-trophy mr-1"></i>JUARA 1</h5>
-                            <p class="font-black text-slate-800 text-lg border-b border-amber-200 pb-2">${j1}</p>
-                            <div>${getRoster(j1)}</div>
-                        </div>
-                        <div class="border-2 border-slate-400 bg-slate-50 p-4 rounded-xl shadow-sm">
-                            <h5 class="font-black text-slate-600 text-sm mb-1 tracking-wider"><i class="fa-solid fa-medal mr-1"></i>JUARA 2</h5>
-                            <p class="font-black text-slate-800 text-lg border-b border-slate-200 pb-2">${j2}</p>
-                            <div>${getRoster(j2)}</div>
-                        </div>
-                        <div class="border-2 border-orange-400 bg-orange-50 p-4 rounded-xl shadow-sm">
-                            <h5 class="font-black text-orange-600 text-sm mb-1 tracking-wider"><i class="fa-solid fa-medal mr-1"></i>JUARA 3 BERSAMA</h5>
-                            <p class="font-black text-slate-800 text-sm border-b border-orange-200 pb-2">${j3_1} & ${j3_2}</p>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div><span class="font-bold text-[9px] uppercase text-orange-600 mt-2 block">Skuad ${j3_1}:</span>${getRoster(j3_1)}</div>
-                                <div><span class="font-bold text-[9px] uppercase text-orange-600 mt-2 block">Skuad ${j3_2}:</span>${getRoster(j3_2)}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                wContainer.innerHTML =
+                    '<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">' +
+                        '<div class="border-2 border-amber-400 bg-amber-50 p-4 rounded-xl shadow-sm">' +
+                            '<h5 class="font-black text-amber-600 text-sm mb-1 tracking-wider"><i class="fa-solid fa-trophy mr-1"></i>JUARA 1</h5>' +
+                            '<p class="font-black text-slate-800 text-lg border-b border-amber-200 pb-2">' + j1 + '</p>' +
+                            '<div>' + getRoster(j1) + '</div>' +
+                        '</div>' +
+                        '<div class="border-2 border-slate-400 bg-slate-50 p-4 rounded-xl shadow-sm">' +
+                            '<h5 class="font-black text-slate-600 text-sm mb-1 tracking-wider"><i class="fa-solid fa-medal mr-1"></i>JUARA 2</h5>' +
+                            '<p class="font-black text-slate-800 text-lg border-b border-slate-200 pb-2">' + j2 + '</p>' +
+                            '<div>' + getRoster(j2) + '</div>' +
+                        '</div>' +
+                        '<div class="border-2 border-orange-400 bg-orange-50 p-4 rounded-xl shadow-sm">' +
+                            '<h5 class="font-black text-orange-600 text-sm mb-1 tracking-wider"><i class="fa-solid fa-award mr-1"></i>JUARA 3</h5>' +
+                            '<p class="font-black text-slate-800 text-lg border-b border-orange-200 pb-2">' + j3 + '</p>' +
+                            '<div>' + getRoster(j3) + '</div>' +
+                        '</div>' +
+                    '</div>';
             }
 
             document.getElementById('idCardPreviewBox').classList.remove('print-active');
@@ -1843,7 +2218,7 @@
             document.getElementById('printReportArea').classList.remove('print-active');
             document.getElementById('printReportArea').classList.add('hidden');
             window.print();
-            setTimeout(() => {
+            setTimeout(function() {
                 document.getElementById('printReportHasilArea').classList.remove('print-active');
                 document.getElementById('printReportHasilArea').classList.add('hidden');
             }, 1000);
@@ -1852,10 +2227,10 @@
         function exportDataExcel() {
             const urutanMap = buildUrutanPerUnsurKecamatanMap(globalAppData.peserta || []);
             let csv = "ID_REG,NAMA_PEMAIN,NOMOR_WHATSAPP,UNSUR,LEMBAGA,KECAMATAN,URUTAN_PENDAFTARAN,WAKTU_PENDAFTARAN\n";
-            (globalAppData.peserta || []).forEach(p => {
+            (globalAppData.peserta || []).forEach(function(p) {
                 const satkerVal = p.Unsur || p.Satker || '';
                 const ur = urutanMap[p.ID_Pendaftaran] || 1;
-                csv += `"${p.ID_Pendaftaran || ''}","${p.Nama_Pemain || ''}","'${getCleanPhoneDisplay(p.Nomor_HP)}","${satkerVal}","${p.Nama_Lembaga || ''}","${p.Nama_Kecamatan || ''}","Urutan ke-${ur}","${p.Timestamp || ''}"\n`;
+                csv += '"' + (p.ID_Pendaftaran || '') + '","' + (p.Nama_Pemain || '') + '","\' ' + getCleanPhoneDisplay(p.Nomor_HP) + '","' + satkerVal + '","' + (p.Nama_Lembaga || '') + '","' + (p.Nama_Kecamatan || '') + '","Urutan ke-' + ur + '","' + (p.Timestamp || '') + '"\n';
             });
             let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             let link = document.createElement("a");

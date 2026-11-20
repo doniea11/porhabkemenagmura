@@ -419,34 +419,6 @@
                         </div>
                     </div>
 
-                    <div class="glass-panel p-4 sm:p-6 rounded-2xl shadow-xl space-y-3">
-                        <h3 class="font-bold text-sm sm:text-base text-white border-b border-slate-800 pb-2.5 flex items-center gap-2">
-                            <i class="fa-solid fa-calendar-check text-emerald-400"></i>Pengaturan Jadwal & Pemilihan Peserta
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Tanggal Buka Pendaftaran</label>
-                                <input type="date" id="panitiaTglBuka" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Tanggal Tutup Pendaftaran</label>
-                                <input type="date" id="panitiaTglTutup" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
-                            </div>
-                        </div>
-                        <button onclick="simpanJadwalPanitia()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold rounded-xl text-xs transition border border-emerald-500/30 flex items-center justify-center shadow-md mt-1 touch-manipulation">
-                            <i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Jadwal Pendaftaran
-                        </button>
-                        
-                        <div class="flex flex-col sm:flex-row gap-3 pt-3 border-t border-slate-800 mt-3">
-                            <button id="btnPemilihanPeserta" onclick="prosesKuotaIntiSistem()" class="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-cyan-600/20 flex items-center justify-center touch-manipulation">
-                                <i class="fa-solid fa-users-gear mr-2"></i>Pilih Peserta (Prioritas)
-                            </button>
-                            <button id="btnUndianPanitia" onclick="undiBaganSistem()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-emerald-600/20 flex items-center justify-center touch-manipulation">
-                                <i class="fa-solid fa-dice mr-2"></i>Undian Pertandingan 16 Besar
-                            </button>
-                        </div>
-                    </div>
-
                     <div class="glass-panel p-4 sm:p-6 rounded-2xl shadow-xl space-y-4">
                         <h3 class="font-bold text-sm sm:text-base text-white border-b border-slate-800 pb-2.5 flex items-center gap-2">
                             <i class="fa-solid fa-trophy text-cyan-400"></i>Update Skor Pertandingan (Klik Kartu di bawah)
@@ -548,11 +520,40 @@
                         </div>
                         <div>
                             <h2 class="font-bold text-base sm:text-lg text-white">Pengaturan Sistem Admin</h2>
-                            <p class="text-xs text-slate-400">Konfigurasi sistem dan manajemen PIN akses</p>
+                            <p class="text-xs text-slate-400">Konfigurasi jadwal, pemilihan peserta, undian, dan manajemen PIN akses</p>
                         </div>
                     </div>
 
                     <div class="space-y-5">
+                        <!-- PENGATURAN JADWAL & PEMILIHAN PESERTA -->
+                        <div class="space-y-3 pb-4 border-b border-slate-800">
+                            <h3 class="font-bold text-xs sm:text-sm text-emerald-400 flex items-center gap-2">
+                                <i class="fa-solid fa-calendar-check"></i>Pengaturan Jadwal &amp; Pemilihan Peserta
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Tanggal Buka Pendaftaran</label>
+                                    <input type="date" id="panitiaTglBuka" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Tanggal Tutup Pendaftaran</label>
+                                    <input type="date" id="panitiaTglTutup" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                                </div>
+                            </div>
+                            <button onclick="simpanJadwalPanitia()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold rounded-xl text-xs transition border border-emerald-500/30 flex items-center justify-center shadow-md mt-1 touch-manipulation">
+                                <i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Jadwal Pendaftaran
+                            </button>
+                            
+                            <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                                <button id="btnPemilihanPeserta" onclick="prosesKuotaIntiSistem()" class="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-cyan-600/20 flex items-center justify-center touch-manipulation">
+                                    <i class="fa-solid fa-users-gear mr-2"></i>Pilih Peserta (Prioritas)
+                                </button>
+                                <button id="btnUndianPanitia" onclick="undiBaganSistem()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-emerald-600/20 flex items-center justify-center touch-manipulation">
+                                    <i class="fa-solid fa-dice mr-2"></i>Undian Pertandingan 16 Besar
+                                </button>
+                            </div>
+                        </div>
+
                         <div>
                             <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Ubah Teks Pengumuman Berjalan</label>
                             <textarea id="adminAnnouncement" rows="2" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-neonGreen"></textarea>

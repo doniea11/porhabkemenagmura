@@ -253,8 +253,11 @@
                                     <i class="fa-solid fa-users mr-1.5"></i>Total Pendaftar: 0 Orang
                                 </div>
                             </div>
-                            <div class="w-full sm:w-auto">
-                                <input type="text" id="searchPeserta" onkeyup="filterPesertaTable()" placeholder="Cari nama/WA/unsur/kecamatan..." class="bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-neonGreen text-slate-200 w-full sm:w-60">
+                            <div class="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
+                                <select id="filterKontingenPeserta" onchange="filterPesertaTable()" class="bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-neonGreen text-slate-200 w-full sm:w-48">
+                                    <option value="">Semua Kontingen</option>
+                                </select>
+                                <input type="text" id="searchPeserta" onkeyup="filterPesertaTable()" placeholder="Cari nama/WA/unsur/kecamatan..." class="bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-neonGreen text-slate-200 w-full sm:w-56">
                             </div>
                         </div>
 
@@ -478,6 +481,7 @@
                     <!-- Blok Tanda Tangan Laporan Peserta -->
                     <div class="mt-12 flex justify-end break-inside-avoid">
                         <div class="text-center text-xs font-sans w-64">
+                            <p id="printDatePeserta" class="text-slate-900 mb-0.5">Muara Beliti, -</p>
                             <p class="font-semibold text-slate-900">Koordinator Turnamen Futsal</p>
                             <div class="h-20"></div>
                             <p class="font-bold text-slate-900 underline">Donny Romanto, S.Kom</p>
@@ -521,9 +525,103 @@
                     <!-- Blok Tanda Tangan Laporan Hasil & Juara -->
                     <div class="mt-12 flex justify-end break-inside-avoid">
                         <div class="text-center text-xs font-sans w-64">
+                            <p id="printDateHasil" class="text-slate-900 mb-0.5">Muara Beliti, -</p>
                             <p class="font-semibold text-slate-900">Koordinator Turnamen Futsal</p>
                             <div class="h-20"></div>
                             <p class="font-bold text-slate-900 underline">Donny Romanto, S.Kom</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW ADMIN -->
+            <section id="view-admin" class="tab-content space-y-6 hidden">
+                <div class="glass-panel p-4 sm:p-6 rounded-2xl shadow-xl max-w-2xl mx-auto space-y-5 w-full">
+                    <div class="flex items-center space-x-3 border-b border-slate-800 pb-3">
+                        <div class="p-3 rounded-xl bg-cyan-500/10 text-cyan-400 flex-shrink-0">
+                            <i class="fa-solid fa-gear text-base"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-base sm:text-lg text-white">Pengaturan Sistem Admin</h2>
+                            <p class="text-xs text-slate-400">Pengaturan jadwal, pemilihan peserta, undian bagan, dan manajemen PIN akses</p>
+                        </div>
+                    </div>
+
+                    <!-- Pengaturan Jadwal & Pemilihan Peserta (Dipindahkan ke Admin) -->
+                    <div class="glass-card p-4 sm:p-5 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="font-bold text-sm sm:text-base text-white border-b border-slate-800 pb-2.5 flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-check text-emerald-400"></i>Pengaturan Jadwal &amp; Pemilihan Peserta
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Tanggal Buka Pendaftaran</label>
+                                <input type="date" id="panitiaTglBuka" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Tanggal Tutup Pendaftaran</label>
+                                <input type="date" id="panitiaTglTutup" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                            </div>
+                        </div>
+                        <button type="button" onclick="simpanJadwalPanitia()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold rounded-xl text-xs transition border border-emerald-500/30 flex items-center justify-center shadow-md mt-1 touch-manipulation">
+                            <i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Jadwal Pendaftaran
+                        </button>
+
+                        <div class="flex flex-col sm:flex-row gap-3 pt-3 border-t border-slate-800 mt-3">
+                            <button type="button" id="btnPemilihanPeserta" onclick="prosesKuotaIntiSistem()" class="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-cyan-600/20 flex items-center justify-center touch-manipulation">
+                                <i class="fa-solid fa-users-gear mr-2"></i>Pilih Peserta (Prioritas)
+                            </button>
+                            <button type="button" id="btnUndianPanitia" onclick="undiBaganSistem()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-emerald-600/20 flex items-center justify-center touch-manipulation">
+                                <i class="fa-solid fa-dice mr-2"></i>Undian Pertandingan 16 Besar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Ubah Teks Pengumuman Berjalan</label>
+                            <textarea id="adminAnnouncement" rows="2" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-neonGreen"></textarea>
+                            <button type="button" onclick="updateAnnouncementAdmin()" class="mt-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition border border-slate-700 touch-manipulation">
+                                Perbarui Pengumuman
+                            </button>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-800 space-y-2.5">
+                            <div>
+                                <h3 class="font-bold text-xs sm:text-sm text-cyan-400">Manajemen PIN Akses Panel Panitia</h3>
+                                <p class="text-[10px] text-slate-400 leading-relaxed">Perbarui PIN keamanan untuk mencegah akses tak dikenal ke Panel Panitia.</p>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Masukkan PIN Panitia Baru</label>
+                                <input type="password" id="adminNewPin" placeholder="••••" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-mono">
+                            </div>
+                            <button type="button" onclick="updatePinPanitiaAdmin()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-cyan-600/20 flex items-center justify-center touch-manipulation">
+                                <i class="fa-solid fa-key mr-2"></i>Perbarui PIN Panel Panitia
+                            </button>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-800 space-y-2.5">
+                            <div>
+                                <h3 class="font-bold text-xs sm:text-sm text-amber-400">Manajemen PIN Akses Pengaturan Admin</h3>
+                                <p class="text-[10px] text-slate-400 leading-relaxed">Perbarui PIN keamanan khusus untuk mengakses menu Pengaturan Admin ini.</p>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Masukkan PIN Admin Baru</label>
+                                <input type="password" id="adminNewPinAdmin" placeholder="••••" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500 font-mono">
+                            </div>
+                            <button type="button" onclick="updatePinAdminAdmin()" class="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-amber-600/20 flex items-center justify-center touch-manipulation">
+                                <i class="fa-solid fa-lock mr-2"></i>Perbarui PIN Pengaturan Admin
+                            </button>
+                        </div>
+
+                        <!-- Zona Reset Bagan Pertandingan -->
+                        <div class="pt-3 border-t border-slate-800 space-y-2.5">
+                            <div>
+                                <h3 class="font-bold text-xs sm:text-sm text-rose-400">Reset Bagan Pertandingan</h3>
+                                <p class="text-[10px] text-slate-400 leading-relaxed">Mengembalikan seluruh jadwal, skor, dan susunan tim 16 Besar hingga Grand Final ke kondisi awal.</p>
+                            </div>
+                            <button type="button" onclick="openResetBaganModal()" class="w-full py-3 bg-rose-600/90 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-rose-600/20 flex items-center justify-center touch-manipulation">
+                                <i class="fa-solid fa-rotate-left mr-2"></i>Reset Bagan ke Posisi Awal
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -737,6 +835,28 @@
             });
             const regKec = document.getElementById('regKecamatan');
             if (regKec) regKec.innerHTML = optionsHtml;
+
+            // Isi dropdown filter kontingen pada tabel peserta
+            const filterKontingen = document.getElementById('filterKontingenPeserta');
+            if (filterKontingen) {
+                let filterHtml = '<option value="">Semua Kontingen</option>' + optionsHtml;
+                filterHtml += '<option value="Kemenag Internal">Kemenag Internal</option>';
+                filterHtml += '<option value="Kemenhaj Musi Rawas">Kemenhaj Musi Rawas</option>';
+                filterKontingen.innerHTML = filterHtml;
+            }
+        }
+
+        // Helper format tanggal cetak otomatis berbahasa Indonesia (contoh: Muara Beliti, 20 November 2026)
+        function getTanggalCetakIndonesia() {
+            const bulanIndo = [
+                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+            ];
+            const now = new Date();
+            const tgl = now.getDate();
+            const bln = bulanIndo[now.getMonth()];
+            const thn = now.getFullYear();
+            return 'Muara Beliti, ' + tgl + ' ' + bln + ' ' + thn;
         }
 
         function onUnsurChange() {
@@ -1035,8 +1155,10 @@
 
         function renderAllViews() {
             if (globalAppData.pengaturan && globalAppData.pengaturan.Pengumuman_Berjalan) {
-                document.getElementById('announcementText').innerText = globalAppData.pengaturan.Pengumuman_Berjalan;
-                document.getElementById('adminAnnouncement').value = globalAppData.pengaturan.Pengumuman_Berjalan;
+                const annTextEl = document.getElementById('announcementText');
+                const adminAnnEl = document.getElementById('adminAnnouncement');
+                if (annTextEl) annTextEl.innerText = globalAppData.pengaturan.Pengumuman_Berjalan;
+                if (adminAnnEl) adminAnnEl.value = globalAppData.pengaturan.Pengumuman_Berjalan;
             }
 
             let isRegOpen = true;
@@ -1134,7 +1256,7 @@
                 }
             }
 
-            renderPesertaTable(getActivePesertaSource());
+            filterPesertaTable(false);
             cekKuotaKecamatan();
             renderSquadList();
             populateCetakKartuDropdown();
@@ -1344,21 +1466,21 @@
             }
         }
 
-        function changeRowsPerPage() {
-            const select = document.getElementById('rowsPerPageSelect');
-            rowsPerPagePeserta = parseInt(select.value, 10);
-            currentPagePeserta = 1;
-            renderPesertaTable(filteredPesertaCache);
-        }
-
-        function filterPesertaTable() {
-            const query = document.getElementById('searchPeserta').value.toLowerCase();
+        function filterPesertaTable(resetPage) {
+            const searchEl = document.getElementById('searchPeserta');
+            const kontingenEl = document.getElementById('filterKontingenPeserta');
+            const query = searchEl ? searchEl.value.toLowerCase().trim() : '';
+            const selectedKontingen = kontingenEl ? kontingenEl.value.trim() : '';
             const sourceList = getActivePesertaSource();
+
             const filtered = sourceList.filter(function(p) {
+                const matchKontingen = !selectedKontingen || (p.Nama_Kecamatan || '').trim() === selectedKontingen;
+                if (!matchKontingen) return false;
+                if (!query) return true;
                 const searchStr = ((p.ID_Pendaftaran || '') + ' ' + (p.Nama_Pemain || '') + ' ' + (p.Nomor_HP || '') + ' ' + (p.Unsur || p.Satker || '') + ' ' + (p.Nama_Lembaga || '') + ' ' + (p.Nama_Kecamatan || '') + ' ' + (p.Status_Pemain || '') + ' ' + (p.Timestamp || '')).toLowerCase();
                 return searchStr.includes(query);
             });
-            currentPagePeserta = 1;
+            if (resetPage !== false) currentPagePeserta = 1;
             renderPesertaTable(filtered);
         }
 
@@ -2113,6 +2235,9 @@
         }
 
         function cetakLaporanPeserta() {
+            const dateEl = document.getElementById('printDatePeserta');
+            if (dateEl) dateEl.innerText = getTanggalCetakIndonesia();
+
             document.getElementById('idCardPreviewBox').classList.remove('print-active');
             document.getElementById('printReportArea').classList.add('print-active');
             document.getElementById('printReportArea').classList.remove('hidden');
@@ -2126,6 +2251,9 @@
         }
 
         function cetakLaporanHasil() {
+            const dateHasilEl = document.getElementById('printDateHasil');
+            if (dateHasilEl) dateHasilEl.innerText = getTanggalCetakIndonesia();
+
             const tMatch = document.getElementById('reportTableMatchBody');
             let matchHtml = '';
             (globalAppData.jadwalSkor || []).forEach(function(m) {

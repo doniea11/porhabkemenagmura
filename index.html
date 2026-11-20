@@ -474,6 +474,15 @@
                             </table>
                         </div>
                     </div>
+
+                    <!-- Blok Tanda Tangan Laporan Peserta -->
+                    <div class="mt-12 flex justify-end break-inside-avoid">
+                        <div class="text-center text-xs font-sans w-64">
+                            <p class="font-semibold text-slate-900">Koordinator Turnamen Futsal</p>
+                            <div class="h-20"></div>
+                            <p class="font-bold text-slate-900 underline">Donny Romanto, S.Kom</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="printReportHasilArea" class="bg-white text-slate-900 p-8 rounded-xl shadow-2xl font-serif space-y-6 hidden">
@@ -508,102 +517,13 @@
                         <h5 class="font-bold text-slate-900 uppercase tracking-wide border-b border-slate-300 pb-1 mt-6">II. Daftar Juara & Skuad Pemain</h5>
                         <div id="winnerListContainer"></div>
                     </div>
-                </div>
-            </section>
 
-            <!-- VIEW ADMIN -->
-            <section id="view-admin" class="tab-content space-y-6 hidden">
-                <div class="glass-panel p-4 sm:p-6 rounded-2xl shadow-xl max-w-xl mx-auto space-y-5 w-full">
-                    <div class="flex items-center space-x-3 border-b border-slate-800 pb-3">
-                        <div class="p-3 rounded-xl bg-cyan-500/10 text-cyan-400 flex-shrink-0">
-                            <i class="fa-solid fa-gear text-base"></i>
-                        </div>
-                        <div>
-                            <h2 class="font-bold text-base sm:text-lg text-white">Pengaturan Sistem Admin</h2>
-                            <p class="text-xs text-slate-400">Konfigurasi jadwal, pemilihan peserta, undian, dan manajemen PIN akses</p>
-                        </div>
-                    </div>
-
-                    <div class="space-y-5">
-                        <!-- PENGATURAN JADWAL & PEMILIHAN PESERTA -->
-                        <div class="space-y-3 pb-4 border-b border-slate-800">
-                            <h3 class="font-bold text-xs sm:text-sm text-emerald-400 flex items-center gap-2">
-                                <i class="fa-solid fa-calendar-check"></i>Pengaturan Jadwal &amp; Pemilihan Peserta
-                            </h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Tanggal Buka Pendaftaran</label>
-                                    <input type="date" id="panitiaTglBuka" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Tanggal Tutup Pendaftaran</label>
-                                    <input type="date" id="panitiaTglTutup" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
-                                </div>
-                            </div>
-                            <button onclick="simpanJadwalPanitia()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold rounded-xl text-xs transition border border-emerald-500/30 flex items-center justify-center shadow-md mt-1 touch-manipulation">
-                                <i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Jadwal Pendaftaran
-                            </button>
-                            
-                            <div class="flex flex-col sm:flex-row gap-3 pt-2">
-                                <button id="btnPemilihanPeserta" onclick="prosesKuotaIntiSistem()" class="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-cyan-600/20 flex items-center justify-center touch-manipulation">
-                                    <i class="fa-solid fa-users-gear mr-2"></i>Pilih Peserta (Prioritas)
-                                </button>
-                                <button id="btnUndianPanitia" onclick="undiBaganSistem()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-emerald-600/20 flex items-center justify-center touch-manipulation">
-                                    <i class="fa-solid fa-dice mr-2"></i>Undian Pertandingan 16 Besar
-                                </button>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Ubah Teks Pengumuman Berjalan</label>
-                            <textarea id="adminAnnouncement" rows="2" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-neonGreen"></textarea>
-                            <button onclick="updateAnnouncementAdmin()" class="mt-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition border border-slate-700 touch-manipulation">
-                                Perbarui Pengumuman
-                            </button>
-                        </div>
-                        
-                        <div class="pt-3 border-t border-slate-800 space-y-2.5">
-                            <div>
-                                <h3 class="font-bold text-xs sm:text-sm text-cyan-400">Manajemen PIN Akses Panel Panitia</h3>
-                                <p class="text-[10px] text-slate-400 leading-relaxed">Perbarui PIN keamanan untuk mencegah akses tak dikenal ke Panel Panitia.</p>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Masukkan PIN Panitia Baru</label>
-                                <input type="password" id="adminNewPin" placeholder="••••" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-mono">
-                            </div>
-                            
-                            <button onclick="updatePinPanitiaAdmin()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-cyan-600/20 flex items-center justify-center touch-manipulation">
-                                <i class="fa-solid fa-key mr-2"></i>Perbarui PIN Panel Panitia
-                            </button>
-                        </div>
-
-                        <div class="pt-3 border-t border-slate-800 space-y-2.5">
-                            <div>
-                                <h3 class="font-bold text-xs sm:text-sm text-amber-400">Manajemen PIN Akses Pengaturan Admin</h3>
-                                <p class="text-[10px] text-slate-400 leading-relaxed">Perbarui PIN keamanan khusus untuk mengakses menu Pengaturan Admin ini.</p>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Masukkan PIN Admin Baru</label>
-                                <input type="password" id="adminNewPinAdmin" placeholder="••••" class="w-full bg-darkBg/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500 font-mono">
-                            </div>
-                            
-                            <button onclick="updatePinAdminAdmin()" class="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-amber-600/20 flex items-center justify-center touch-manipulation">
-                                <i class="fa-solid fa-lock mr-2"></i>Perbarui PIN Pengaturan Admin
-                            </button>
-                        </div>
-
-                        <div class="pt-4 border-t border-rose-500/30 space-y-2.5">
-                            <div>
-                                <h3 class="font-bold text-xs sm:text-sm text-rose-400 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-rotate-left"></i>Manajemen Bagan Pertandingan
-                                </h3>
-                                <p class="text-[10px] text-slate-400 leading-relaxed">Kembalikan seluruh susunan bagan 16 Besar hingga Grand Final ke posisi awal (seluruh skor direset ke 0).</p>
-                            </div>
-                            <button type="button" onclick="openResetBaganModal()" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-rose-600/20 flex items-center justify-center touch-manipulation">
-                                <i class="fa-solid fa-trash-arrow-up mr-2"></i>Reset Bagan ke Posisi Awal
-                            </button>
+                    <!-- Blok Tanda Tangan Laporan Hasil & Juara -->
+                    <div class="mt-12 flex justify-end break-inside-avoid">
+                        <div class="text-center text-xs font-sans w-64">
+                            <p class="font-semibold text-slate-900">Koordinator Turnamen Futsal</p>
+                            <div class="h-20"></div>
+                            <p class="font-bold text-slate-900 underline">Donny Romanto, S.Kom</p>
                         </div>
                     </div>
                 </div>
@@ -756,7 +676,7 @@
         // SETTING API GOOGLE APPS SCRIPT (WEB APP URL)
         // SILAKAN GANTI URL DI BAWAH INI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA
         // =========================================================================
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwpnZabJvAu-9zbnFusbBjUWaQOF5bdO--vIp2LFssToWF-OhZ5Lp4N_EyJjwL5HHh6Cg/exec";
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyzUWU4HKWPZWT5SoLMDqv-pAbbKpg_ypaiccXzTdBlrFtWX1Jf_eEswNcmnubWeURjeQ/exec";
         // =========================================================================
 
         let globalAppData = {
@@ -1356,7 +1276,7 @@
                 const kecamatan = (p.Nama_Kecamatan || '-').trim();
                 const urutanKe = urutanMap[p.ID_Pendaftaran] || 1;
                 const statusStr = (p.Status_Pemain || '').toString().trim();
-                const isCadangan = statusStr.toLowerCase() === 'cadangan';
+                const isCadangan = isRegClosed && statusStr.toLowerCase() === 'cadangan';
 
                 const badgeClass = isCadangan
                     ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
@@ -1556,7 +1476,7 @@
             document.getElementById('cardIdReg').innerText = p.ID_Pendaftaran || '-';
             document.getElementById('cardTimestamp').innerText = p.Timestamp || '-';
             
-            const isCadangan = (p.Status_Pemain || '').toLowerCase() === 'cadangan';
+            const isCadangan = isRegClosed && (p.Status_Pemain || '').toLowerCase() === 'cadangan';
             const badge = document.getElementById('cardStatusBadge');
             badge.innerText = isCadangan ? ('URUTAN KE-' + ur + ' (CADANGAN)') : ('URUTAN KE-' + ur + ' (' + (p.Unsur || '').toUpperCase() + ')');
             badge.className = isCadangan

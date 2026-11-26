@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PORHAB KEMENAG MUSI RAWAS</title>
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
-    <link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
-    <link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
-    <link href="[https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;0,900;1,900&family=Orbitron:wght@700;900&display=swap](https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;0,900;1,900&family=Orbitron:wght@700;900&display=swap)" rel="stylesheet">
-    <script src="[https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js](https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js)"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;0,900;1,900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -774,7 +774,7 @@
         // SETTING API GOOGLE APPS SCRIPT (WEB APP URL)
         // SILAKAN GANTI URL DI BAWAH INI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA
         // =========================================================================
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxHMCOK0OBSxw9kgLTLjLjI2ahIEknblw2Nf6oW1ihh_tD_8poNbrnB-EOE8ZfspGwC2A/exec";
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyWxQIPfwxZG6wLK4zE-KG61jJuULglfOcCCIbGrOTUPT0Vxj-q5Phh5A9ys8pOBnY4dA/exec";
         // =========================================================================
 
         let globalAppData = {
@@ -798,7 +798,6 @@
             "Kec. Tiang Pumpung Kepungut", "Kec. Tuah Negeri"
         ];
 
-        // Helper waktu akurat WIB (UTC+7) yang disinkronkan dengan server
         function getCurrentTimeMs() {
             return Date.now() + serverTimeOffsetMs;
         }
@@ -831,7 +830,6 @@
             const menit = parseInt(tParts[1], 10) || 0;
             const detik = parseInt(tParts[2], 10) || 0;
 
-            // Konversi waktu WIB (UTC+7) ke epoch UTC (ms)
             return Date.UTC(tahun, bulan - 1, hari, jam - 7, menit, detik, 0);
         }
 
@@ -858,10 +856,7 @@
             return {
                 isOpen: isOpen,
                 isNotYetOpen: isNotYetOpen,
-                isClosed: isClosed,
-                bukaMs: bukaMs,
-                tutupMs: tutupMs,
-                tglTutup: tglTutup
+                isClosed: isClosed
             };
         }
 
@@ -872,7 +867,6 @@
             }
 
             const statusAwal = getStatusJadwalPendaftaran();
-            // Pantau waktu WIB tiap 1 detik agar pendaftaran otomatis selesai tepat pukul 23:59:59 WIB tanpa refresh
             if (!statusAwal.isClosed) {
                 regScheduleTimer = setInterval(function() {
                     const statusSekarang = getStatusJadwalPendaftaran();
@@ -1189,7 +1183,7 @@
             else if (digits.startsWith('8')) displayHp = '0' + digits;
 
             const waNum = displayHp.startsWith('0') ? '62' + displayHp.substring(1) : displayHp;
-            return '<a href="[https://wa.me/](https://wa.me/)' + waNum + '" target="_blank" rel="noopener noreferrer" class="' + cls + ' hover:underline inline-flex items-center gap-1.5 font-mono transition-colors" title="Chat WhatsApp ' + displayHp + '"><i class="fa-brands fa-whatsapp text-base text-emerald-400"></i><span>' + displayHp + '</span></a>';
+            return '<a href="https://wa.me/' + waNum + '" target="_blank" rel="noopener noreferrer" class="' + cls + ' hover:underline inline-flex items-center gap-1.5 font-mono transition-colors" title="Chat WhatsApp ' + displayHp + '"><i class="fa-brands fa-whatsapp text-base text-emerald-400"></i><span>' + displayHp + '</span></a>';
         }
 
         function getCleanPhoneDisplay(rawNomor) {
@@ -1293,7 +1287,7 @@
                     tableBox.classList.add('lg:col-span-2');
                 }
                 if (tableBoxTitle) tableBoxTitle.innerText = "Daftar Kontingen & Pemain";
-                if (tableBoxSubtitle) tableBoxSubtitle.innerText = "Pendaftaran terbuka tanpa batas kuota. Seleksi maks. 8 pemain inti per kontingen dilakukan sistem secara acak per unsur setelah pendaftaran ditutup.";
+                if (tableBoxSubtitle) tableBoxSubtitle.innerText = "Pendaftaran terbuka tanpa batas kuota. Seleksi maks. 8 pemain inti per kontingen dilakukan sistem setelah pendaftaran ditutup.";
                 if (squadListTitle) squadListTitle.innerText = "Daftar Pendaftar Turnamen Futsal";
                 if (squadListSubtitle) squadListSubtitle.innerText = "Rekap Pendaftar Sementara per Kecamatan HAB Kemenag Musi Rawas 2026";
             } else {
@@ -1393,7 +1387,7 @@
             let nextUrutan = totalUnsurKec + 1;
             let htmlInfo = 'Total Pendaftar (' + kecamatan + '): <span class="text-white font-bold">' + totalKec + ' orang (Tanpa Batas)</span><br>';
             htmlInfo += 'Urutan Pendaftaran Unsur (' + unsur + '): <span class="text-neonGreen font-bold">Urutan ke-' + nextUrutan + '</span> di ' + kecamatan;
-            htmlInfo += '<span class="text-slate-400 text-[10px] mt-1 block">Seleksi maks. 8 pemain inti per kontingen dilakukan sistem secara acak per unsur setelah pendaftaran ditutup.</span>';
+            htmlInfo += '<span class="text-slate-400 text-[10px] mt-1 block">Seleksi maks. 8 pemain inti per kontingen dilakukan sistem setelah pendaftaran ditutup.</span>';
             
             document.getElementById('quotaDetailText').innerHTML = htmlInfo;
         }
@@ -2257,7 +2251,7 @@
             const tgl = String(document.getElementById('panitiaTglTutup').value);
             if (!tgl) return showErrorModal("Peringatan", "Pilih tanggal tutup pendaftaran terlebih dahulu.");
             
-            showLoading("Menjalankan Pemilihan Acak & Round Robin...");
+            showLoading("Menjalankan Algoritma Round Robin...");
             try {
                 const res = await fetchAPI('prosesPenentuanInti', tgl);
                 hideLoading();

@@ -774,7 +774,7 @@
         // SETTING API GOOGLE APPS SCRIPT (WEB APP URL)
         // SILAKAN GANTI URL DI BAWAH INI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA
         // =========================================================================
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyzUWU4HKWPZWT5SoLMDqv-pAbbKpg_ypaiccXzTdBlrFtWX1Jf_eEswNcmnubWeURjeQ/exec";
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzQvaQ86sOWodUES6PxX4fM6T8M4dyncLoJ65ZU0pIC4j6meRgetzIlE6W2VB66IplDmg/exec";
         // =========================================================================
 
         let globalAppData = {
@@ -788,6 +788,8 @@
         let filteredPesertaCache = [];
         let isRegClosed = false;
         let isPemilihanSelesai = false;
+        let serverTimeOffsetMs = 0;
+        let regScheduleTimer = null;
 
         const daftarKecamatanMusiRawas = [
             "Kec. Muara Beliti", "Kec. Tugumulyo", "Kec. Megang Sakti", "Kec. Muara Kelingi", 
@@ -795,6 +797,99 @@
             "Kec. Purwodadi", "Kec. Sumber Harta", "Kec. STL Ulu Terawas", "Kec. Sukakarya", 
             "Kec. Tiang Pumpung Kepungut", "Kec. Tuah Negeri"
         ];
+
+        // Helper waktu akurat WIB (UTC+7) yang disinkronkan dengan server
+        function getCurrentTimeMs() {
+            return Date.now() + serverTimeOffsetMs;
+        }
+
+        function parseTanggalKeWibMs(dateStr, jamStr) {
+            if (!dateStr) return null;
+            const raw = dateStr.toString().trim();
+            let tahun, bulan, hari;
+
+            if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+                const pIso = raw.split('-');
+                tahun = parseInt(pIso[0], 10);
+                bulan = parseInt(pIso[1], 10);
+                hari = parseInt(pIso[2], 10);
+            } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(raw)) {
+                const pId = raw.split('/');
+                hari = parseInt(pId[0], 10);
+                bulan = parseInt(pId[1], 10);
+                tahun = parseInt(pId[2], 10);
+            } else {
+                const parsed = new Date(raw);
+                if (isNaN(parsed.getTime())) return null;
+                tahun = parsed.getFullYear();
+                bulan = parsed.getMonth() + 1;
+                hari = parsed.getDate();
+            }
+
+            const tParts = (jamStr || '00:00:00').split(':');
+            const jam = parseInt(tParts[0], 10) || 0;
+            const menit = parseInt(tParts[1], 10) || 0;
+            const detik = parseInt(tParts[2], 10) || 0;
+
+            // Konversi waktu WIB (UTC+7) ke epoch UTC (ms)
+            return Date.UTC(tahun, bulan - 1, hari, jam - 7, menit, detik, 0);
+        }
+
+        function getStatusJadwalPendaftaran() {
+            const sekarangMs = getCurrentTimeMs();
+            const tglBuka = globalAppData.pengaturan ? globalAppData.pengaturan.Tanggal_Buka_Pendaftaran : '';
+            const tglTutup = globalAppData.pengaturan ? globalAppData.pengaturan.Tanggal_Batas_Pendaftaran : '';
+
+            let isOpen = true;
+            let isNotYetOpen = false;
+            let isClosed = false;
+
+            const tutupMs = tglTutup ? parseTanggalKeWibMs(tglTutup, '23:59:59') : null;
+            const bukaMs = tglBuka ? parseTanggalKeWibMs(tglBuka, '00:00:00') : null;
+
+            if (tutupMs !== null && sekarangMs >= tutupMs) {
+                isOpen = false;
+                isClosed = true;
+            } else if (bukaMs !== null && sekarangMs < bukaMs) {
+                isOpen = false;
+                isNotYetOpen = true;
+            }
+
+            return {
+                isOpen: isOpen,
+                isNotYetOpen: isNotYetOpen,
+                isClosed: isClosed,
+                bukaMs: bukaMs,
+                tutupMs: tutupMs,
+                tglTutup: tglTutup
+            };
+        }
+
+        function startRegScheduleWatcher() {
+            if (regScheduleTimer) {
+                clearInterval(regScheduleTimer);
+                regScheduleTimer = null;
+            }
+
+            const statusAwal = getStatusJadwalPendaftaran();
+            // Pantau waktu WIB tiap 1 detik agar pendaftaran otomatis selesai tepat pukul 23:59:59 WIB tanpa refresh
+            if (!statusAwal.isClosed) {
+                regScheduleTimer = setInterval(function() {
+                    const statusSekarang = getStatusJadwalPendaftaran();
+                    if (statusSekarang.isClosed !== statusAwal.isClosed || statusSekarang.isOpen !== statusAwal.isOpen) {
+                        clearInterval(regScheduleTimer);
+                        regScheduleTimer = null;
+                        renderAllViews();
+                        if (statusSekarang.isClosed) {
+                            showErrorModal(
+                                'Pendaftaran Ditutup',
+                                'Masa pendaftaran telah selesai pada pukul 23:59:59 WIB. Halaman pendaftaran otomatis ditutup.'
+                            );
+                        }
+                    }
+                }, 1000);
+            }
+        }
 
         // Wrapper API yang kompatibel untuk GAS Web App URL maupun mode Safe Preview
         async function fetchAPI(action, dataPayload = null) {
@@ -1119,6 +1214,9 @@
                 const res = await fetchAPI('getAppData');
                 hideLoading();
                 if (res.status === 'success') {
+                    if (res.serverTimeMs) {
+                        serverTimeOffsetMs = res.serverTimeMs - Date.now();
+                    }
                     globalAppData = res;
                     if (!globalAppData.jadwalSkor || globalAppData.jadwalSkor.length === 0) globalAppData.jadwalSkor = getDefaultJadwalSkor();
                     renderAllViews();
@@ -1134,14 +1232,14 @@
 
         function getDefaultJadwalSkor() {
             return [
-                { ID_Match: 'MATCH-001', Babak: '16 Besar', Tim_A: 'Kec. Muara Beliti', Tim_B: 'Kec. Tugumulyo', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
+                { ID_Match: 'MATCH-001', Babak: '16 Besar', Tim_A: 'Kemenag Internal', Tim_B: 'Kemenhaj Musi Rawas', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
                 { ID_Match: 'MATCH-002', Babak: '16 Besar', Tim_A: 'Kec. Megang Sakti', Tim_B: 'Kec. Muara Kelingi', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
                 { ID_Match: 'MATCH-003', Babak: '16 Besar', Tim_A: 'Kec. Muara Lakitan', Tim_B: 'Kec. BTS Ulu', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
                 { ID_Match: 'MATCH-004', Babak: '16 Besar', Tim_A: 'Kec. Jayaloka', Tim_B: 'Kec. Selangit', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
                 { ID_Match: 'MATCH-005', Babak: '16 Besar', Tim_A: 'Kec. Purwodadi', Tim_B: 'Kec. Sumber Harta', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
                 { ID_Match: 'MATCH-006', Babak: '16 Besar', Tim_A: 'Kec. STL Ulu Terawas', Tim_B: 'Kec. Sukakarya', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
                 { ID_Match: 'MATCH-007', Babak: '16 Besar', Tim_A: 'Kec. Tiang Pumpung Kepungut', Tim_B: 'Kec. Tuah Negeri', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
-                { ID_Match: 'MATCH-008', Babak: '16 Besar', Tim_A: 'Kemenag Internal', Tim_B: 'Kemenhaj Musi Rawas', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
+                { ID_Match: 'MATCH-008', Babak: '16 Besar', Tim_A: 'Kec. Muara Beliti', Tim_B: 'Kec. Tugumulyo', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
                 { ID_Match: 'MATCH-009', Babak: 'Perempat Final', Tim_A: 'Pemenang 1', Tim_B: 'Pemenang 3', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
                 { ID_Match: 'MATCH-010', Babak: 'Perempat Final', Tim_A: 'Pemenang 2', Tim_B: 'Pemenang 4', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
                 { ID_Match: 'MATCH-011', Babak: 'Perempat Final', Tim_A: 'Pemenang 5', Tim_B: 'Pemenang 7', Skor_A: 0, Skor_B: 0, Status_Match: 'Belum Mulai', Pemenang: '-' },
@@ -1161,32 +1259,20 @@
                 if (adminAnnEl) adminAnnEl.value = globalAppData.pengaturan.Pengumuman_Berjalan;
             }
 
-            let isRegOpen = true;
-            let isRegNotYetOpen = false;
-            isRegClosed = false;
-            isPemilihanSelesai = !!(globalAppData.pengaturan && globalAppData.pengaturan.Pemilihan_Prioritas_Selesai === 'Ya');
-            let sekarang = new Date();
-            
             if (globalAppData.pengaturan && globalAppData.pengaturan.Tanggal_Batas_Pendaftaran) {
                 const panitiaTutup = document.getElementById('panitiaTglTutup');
                 if (panitiaTutup) panitiaTutup.value = globalAppData.pengaturan.Tanggal_Batas_Pendaftaran;
-                let tutup = new Date(globalAppData.pengaturan.Tanggal_Batas_Pendaftaran);
-                tutup.setHours(23, 59, 59, 999);
-                if (sekarang > tutup) {
-                    isRegOpen = false;
-                    isRegClosed = true;
-                }
             }
             if (globalAppData.pengaturan && globalAppData.pengaturan.Tanggal_Buka_Pendaftaran) {
                 const panitiaBuka = document.getElementById('panitiaTglBuka');
                 if (panitiaBuka) panitiaBuka.value = globalAppData.pengaturan.Tanggal_Buka_Pendaftaran;
-                let buka = new Date(globalAppData.pengaturan.Tanggal_Buka_Pendaftaran);
-                buka.setHours(0, 0, 0, 0);
-                if (sekarang < buka) {
-                    isRegOpen = false;
-                    isRegNotYetOpen = true;
-                }
             }
+
+            const statusJadwal = getStatusJadwalPendaftaran();
+            let isRegOpen = statusJadwal.isOpen;
+            let isRegNotYetOpen = statusJadwal.isNotYetOpen;
+            isRegClosed = statusJadwal.isClosed;
+            isPemilihanSelesai = !!(globalAppData.pengaturan && globalAppData.pengaturan.Pemilihan_Prioritas_Selesai === 'Ya');
 
             const formContainer = document.getElementById('formPendaftaranContainer');
             const formBox = document.getElementById('formBox');
@@ -1264,6 +1350,7 @@
             renderPodiumJuara();
             renderDynamicBracket('dynamicMainBracketView', false);
             renderDynamicBracket('panitiaBracketView', true);
+            startRegScheduleWatcher();
         }
 
         // Ambil daftar peserta sesuai status jadwal (jika ditutup, hanya tampilkan hasil pemilihan sistem)
@@ -1313,6 +1400,17 @@
 
         async function handlePendaftaran(e) {
             if (e) e.preventDefault();
+
+            const statusJadwal = getStatusJadwalPendaftaran();
+            if (statusJadwal.isClosed) {
+                renderAllViews();
+                return showErrorModal('Pendaftaran Ditutup', 'Masa pendaftaran telah selesai pada pukul 23:59:59 WIB.');
+            }
+            if (statusJadwal.isNotYetOpen) {
+                renderAllViews();
+                return showErrorModal('Belum Dibuka', 'Masa pendaftaran belum dibuka.');
+            }
+
             let kecamatan = String(document.getElementById('regKecamatan').value);
             const unsur = String(document.getElementById('regUnsur').value);
             
